@@ -1,4 +1,4 @@
-package com.example.uk_power
+package com.esc.uk_power
 
 import io.flutter.embedding.android.FlutterActivity
 
