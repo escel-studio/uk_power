@@ -4,10 +4,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:window_size/window_size.dart';
+
 import 'package:uk_power/ddos_controller.dart';
 import 'package:uk_power/ddos_status.dart';
 import 'package:uk_power/logger.dart';
-import 'package:window_size/window_size.dart';
 
 const primaryColor = Color(0xFF2697FF);
 const secondaryColor = Color(0xFF2A2D3E);
@@ -165,6 +166,7 @@ class _HomeState extends State<Home> {
                           } else {
                             setState(() {
                               status = AppStatus.stopped;
+                              logs.clear();
                             });
                           }
                         },
@@ -180,57 +182,9 @@ class _HomeState extends State<Home> {
               ],
             ),
             // logs
-            Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 15.0,
-                ),
-                controller: loggerController,
-                itemCount: logs.length,
-                itemBuilder: (context, index) {
-                  var info = logs.elementAt(index);
-                  String title = Logger.logTitle(info);
-                  String description = Logger.logDescription(info);
-
-                  return ListTile(
-                    minVerticalPadding: 15.0,
-                    leading: Icon(
-                      info.status == DDOSStatus.error
-                          ? CupertinoIcons.clear_circled
-                          : info.status == DDOSStatus.success
-                              ? CupertinoIcons.checkmark_circle
-                              : CupertinoIcons.timer,
-                      size: 35.h,
-                      color: info.status == DDOSStatus.error
-                          ? Colors.red
-                          : info.status == DDOSStatus.success
-                              ? Colors.greenAccent
-                              : Colors.yellowAccent,
-                    ),
-                    title: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            title,
-                          ),
-                        ),
-                      ],
-                    ),
-                    subtitle: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            description,
-                            style: const TextStyle(
-                              color: Color.fromARGB(255, 161, 161, 161),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
+            _Logs(
+              loggerController: loggerController,
+              logs: logs,
             ),
           ],
         ),
@@ -272,11 +226,11 @@ class _HomeState extends State<Home> {
         });
       });
 
-      await Future.delayed(const Duration(seconds: 1));
-
       if (logs.length > 100) {
         logs.removeAt(0);
       }
+
+      await Future.delayed(const Duration(seconds: 3));
 
       loggerController.animateTo(
         loggerController.position.maxScrollExtent,
@@ -286,5 +240,72 @@ class _HomeState extends State<Home> {
     }
 
     start();
+  }
+}
+
+class _Logs extends StatelessWidget {
+  ScrollController loggerController;
+  List<DDOSInfo> logs;
+
+  _Logs({
+    Key? key,
+    required this.loggerController,
+    required this.logs,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: ListView.builder(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 15.0,
+        ),
+        controller: loggerController,
+        itemCount: logs.length,
+        itemBuilder: (context, index) {
+          var info = logs.elementAt(index);
+          String title = Logger.logTitle(info);
+          String description = Logger.logDescription(info);
+
+          return ListTile(
+            minVerticalPadding: 15.0,
+            leading: Icon(
+              info.status == DDOSStatus.error
+                  ? CupertinoIcons.clear_circled
+                  : info.status == DDOSStatus.success
+                      ? CupertinoIcons.checkmark_circle
+                      : CupertinoIcons.timer,
+              size: 35.h,
+              color: info.status == DDOSStatus.error
+                  ? Colors.red
+                  : info.status == DDOSStatus.success
+                      ? Colors.greenAccent
+                      : Colors.yellowAccent,
+            ),
+            title: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    title,
+                  ),
+                ),
+              ],
+            ),
+            subtitle: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    description,
+                    style: const TextStyle(
+                      color: Color.fromARGB(255, 161, 161, 161),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
   }
 }
