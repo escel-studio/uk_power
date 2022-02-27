@@ -18,9 +18,16 @@ const defaultPadding = 16.0;
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  if (Platform.isWindows) {
-    setWindowMaxSize(const Size(500, 760));
-    setWindowMinSize(const Size(500, 760));
+  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+    setWindowTitle("UK - Power");
+    if (Platform.isWindows) {
+      setWindowMaxSize(const Size(500, 760));
+      setWindowMinSize(const Size(500, 760));
+    }
+    if (Platform.isMacOS) {
+      setWindowMaxSize(const Size(400, 600));
+      setWindowMinSize(const Size(400, 600));
+    }
   }
 
   runApp(const MyApp());
