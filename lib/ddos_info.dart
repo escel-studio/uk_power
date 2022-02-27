@@ -9,14 +9,14 @@ enum DDOSStatus {
 
 class DDOSInfo {
   String msg;
-  Uri target;
+  Uri? target;
   DateTime dateTime;
   int responseCode;
   DDOSStatus status;
 
   DDOSInfo({
     required this.msg,
-    required this.target,
+    this.target,
     required this.dateTime,
     required this.responseCode,
     required this.status,
@@ -41,7 +41,7 @@ class DDOSInfo {
   Map<String, dynamic> toMap() {
     return {
       'msg': msg,
-      'target': target.toString(),
+      'target': target?.toString(),
       'dateTime': dateTime.millisecondsSinceEpoch,
       'responseCode': responseCode,
       'status': status.index,
@@ -51,10 +51,10 @@ class DDOSInfo {
   factory DDOSInfo.fromMap(Map<String, dynamic> map) {
     return DDOSInfo(
       msg: map['msg'] ?? '',
-      target: Uri.parse(map['target']),
+      target: map['target'] != null ? Uri.parse(map['target']) : null,
       dateTime: DateTime.fromMillisecondsSinceEpoch(map['dateTime']),
       responseCode: map['responseCode']?.toInt() ?? 0,
-      status: DDOSStatus.values[map['status']?.toInt() ?? 0],
+      status: DDOSStatus.values[map['status'] ?? 0],
     );
   }
 

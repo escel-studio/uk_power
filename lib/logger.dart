@@ -1,17 +1,22 @@
 import 'package:intl/intl.dart';
-import 'package:uk_power/ddos_status.dart';
+import 'package:uk_power/ddos_info.dart';
 
 class Logger {
   static String logTitle(DDOSInfo info) {
-    String msg =
-        "[${DateFormat("dd.MM.yy hh:mm:ss").format(info.dateTime)}] Атака - ";
+    String msg = "[${DateFormat("dd.MM.yy hh:mm:ss").format(info.dateTime)}] ";
+    if (info.responseCode >= 500) {
+      info.status = DDOSStatus.success;
+      msg += "Ресурс лежить!";
+
+      return msg;
+    }
 
     switch (info.status) {
       case DDOSStatus.none:
-        msg += "????????????????????\n";
+        msg += "????????????????????";
         break;
       case DDOSStatus.success:
-        msg += "В процесі";
+        msg += "З'єднанно, обробка в процесі";
         break;
       case DDOSStatus.error:
         msg += "Помилка";
@@ -25,10 +30,13 @@ class Logger {
   }
 
   static String logDescription(DDOSInfo info) {
-    var target = info.target.toString();
+    Uri? target = info.target;
 
-    String msg =
-        "Ресурс: $target, Статус: ${info.responseCode}, Повідомлення: ${info.msg}";
+    String msg = "Статус: ${info.responseCode}, Повідомлення: ${info.msg}";
+
+    if (target != null) {
+      msg = "Ресурс: $target, " + msg;
+    }
 
     return msg;
   }
