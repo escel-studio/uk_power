@@ -328,7 +328,7 @@ class DDOSController {
           (info) {
             callback(info);
           },
-          Uri.parse(target),
+          Uri.parse(_formateURL(target)),
           headers,
           proxies,
         );
