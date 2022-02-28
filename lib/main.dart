@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -169,11 +170,14 @@ class _HomeState extends State<Home> {
   Future<void> start() async {
     // lets create 5 tasks
     _attack();
-    // await Future.delayed(const Duration(seconds: 2)).then((value) => _attack());
-    // await Future.delayed(const Duration(seconds: 2)).then((value) => _attack());
-    // await Future.delayed(const Duration(seconds: 2)).then((value) => _attack());
-    // // ast one should be await
-    // await _attack();
+    await Future.delayed(const Duration(seconds: 1));
+    _attack();
+    await Future.delayed(const Duration(seconds: 1));
+    _attack();
+    await Future.delayed(const Duration(seconds: 1));
+    _attack();
+    // ast one should be await
+    await _attack();
   }
 
   /// main attack activity
@@ -188,8 +192,10 @@ class _HomeState extends State<Home> {
           status = AppStatus.stopped;
           isError = true;
         }
-        if (msg.isNotEmpty) msg += "\n";
-        msg += info.msg;
+        if (!msg.contains(info.msg)) {
+          if (msg.isNotEmpty) msg += "\n";
+          msg += info.msg;
+        }
       });
     });
     // 2) if error:
@@ -202,23 +208,14 @@ class _HomeState extends State<Home> {
       try {
         await controller.dance((_info) {
           _log(_info);
+
+          // lets not flood in the memory with old logs and clean first 10 of them
+          if (logs.length > 100) {
+            setState(() {
+              logs.removeRange(0, 9);
+            });
+          }
         });
-
-        // lets not flood in the memory with old logs and clean first 10 of them
-        if (logs.length > 100) {
-          setState(() {
-            logs.removeRange(0, 9);
-          });
-        }
-
-        // lets take a break for a 1 seconds
-        await Future.delayed(const Duration(seconds: 1));
-        // lets scroll to the latest logs
-        loggerController.animateTo(
-          loggerController.position.maxScrollExtent,
-          curve: Curves.easeOut,
-          duration: const Duration(milliseconds: 100),
-        );
       } catch (ex) {
         _log(
           DDOSInfo(
@@ -233,17 +230,24 @@ class _HomeState extends State<Home> {
         setState(() {
           status = AppStatus.stopped;
         });
-
         return;
       }
     }
   }
 
   /// update logs
-  void _log(DDOSInfo info) {
+  void _log(DDOSInfo info) async {
     setState(() {
       logs.add(info);
     });
+    // lets take a break for a 1 seconds
+    await Future.delayed(const Duration(seconds: 1));
+    // lets scroll to the latest logs
+    loggerController.animateTo(
+      loggerController.position.maxScrollExtent,
+      curve: Curves.easeOut,
+      duration: const Duration(milliseconds: 100),
+    );
   }
 }
 

