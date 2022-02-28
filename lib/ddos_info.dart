@@ -3,6 +3,7 @@ import 'dart:convert';
 enum DDOSStatus {
   none,
   success,
+  attack,
   error,
   waiting,
 }

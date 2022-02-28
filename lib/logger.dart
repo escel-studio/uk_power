@@ -24,6 +24,9 @@ class Logger {
       case DDOSStatus.waiting:
         msg += "Очікуємо";
         break;
+      case DDOSStatus.attack:
+        msg += "Атакуємо";
+        break;
     }
 
     return msg;

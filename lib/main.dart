@@ -155,6 +155,7 @@ class _HomeState extends State<Home> {
         status = AppStatus.started;
         logs.clear();
         isError = false;
+        msg = "";
       });
       await start();
     } else {
@@ -187,8 +188,8 @@ class _HomeState extends State<Home> {
           status = AppStatus.stopped;
           isError = true;
         }
-
-        msg = info.msg;
+        if (msg.isNotEmpty) msg += "\n";
+        msg += info.msg;
       });
     });
     // 2) if error:
@@ -210,8 +211,8 @@ class _HomeState extends State<Home> {
           });
         }
 
-        // lets take a break for a 3 seconds
-        await Future.delayed(const Duration(seconds: 3));
+        // lets take a break for a 1 seconds
+        await Future.delayed(const Duration(seconds: 1));
         // lets scroll to the latest logs
         loggerController.animateTo(
           loggerController.position.maxScrollExtent,
@@ -287,7 +288,7 @@ class _Status extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    EdgeInsets padding = const EdgeInsets.all(15.0);
+    EdgeInsets padding = const EdgeInsets.all(10.0);
     IconData iconData;
     Color color;
 
@@ -362,15 +363,24 @@ class _Logs extends StatelessWidget {
           IconData iconData;
           Color color;
 
-          if (info.status == DDOSStatus.error) {
-            iconData = CupertinoIcons.clear_circled;
-            color = Colors.red;
-          } else if (info.status == DDOSStatus.success) {
-            iconData = CupertinoIcons.checkmark_circle;
-            color = Colors.greenAccent;
-          } else {
-            iconData = CupertinoIcons.timer;
-            color = Colors.yellowAccent;
+          switch (info.status) {
+            case DDOSStatus.success:
+              iconData = CupertinoIcons.checkmark_circle;
+              color = Colors.greenAccent;
+              break;
+            case DDOSStatus.attack:
+              iconData = CupertinoIcons.square_stack_3d_down_dottedline;
+              color = Colors.blueAccent;
+              break;
+            case DDOSStatus.error:
+              iconData = CupertinoIcons.clear_circled;
+              color = Colors.red;
+              break;
+            case DDOSStatus.none:
+            case DDOSStatus.waiting:
+              iconData = CupertinoIcons.timer;
+              color = Colors.yellowAccent;
+              break;
           }
 
           return ListTile(
