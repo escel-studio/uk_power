@@ -10,14 +10,9 @@ import 'package:intl/intl.dart';
 import 'package:window_size/window_size.dart';
 
 import 'package:uk_power/ddos_controller.dart';
+import 'package:uk_power/constants.dart';
 import 'package:uk_power/ddos_info.dart';
 import 'package:uk_power/logger.dart';
-
-const primaryColor = Color(0xFF2697FF);
-const secondaryColor = Color(0xFF2A2D3E);
-const bgColor = Color(0xFF212332);
-
-const defaultPadding = 16.0;
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -68,7 +63,7 @@ class App extends StatelessWidget {
   }
 }
 
-enum AppStatus {
+enum _AppStatus {
   started,
   stopped,
 }
@@ -81,7 +76,7 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  AppStatus status = AppStatus.stopped;
+  _AppStatus status = _AppStatus.stopped;
   ScrollController loggerController = ScrollController();
   String msg = "";
   bool isError = false;
@@ -113,7 +108,7 @@ class _HomeState extends State<Home> {
     String title;
     Color borderColor;
 
-    if (status == AppStatus.started) {
+    if (status == _AppStatus.started) {
       title = "Зупинити атаку";
       borderColor = Colors.red;
     } else {
@@ -151,9 +146,9 @@ class _HomeState extends State<Home> {
   }
 
   Future<void> _btnPressed() async {
-    if (status == AppStatus.stopped) {
+    if (status == _AppStatus.stopped) {
       setState(() {
-        status = AppStatus.started;
+        status = _AppStatus.started;
         logs.clear();
         isError = false;
         msg = "";
@@ -161,7 +156,7 @@ class _HomeState extends State<Home> {
       await start();
     } else {
       setState(() {
-        status = AppStatus.stopped;
+        status = _AppStatus.stopped;
       });
     }
   }
@@ -169,13 +164,13 @@ class _HomeState extends State<Home> {
   /// start function, will create 5 tasks with last one on await
   Future<void> start() async {
     // lets create 5 tasks
-    _attack();
-    await Future.delayed(const Duration(seconds: 1));
-    _attack();
-    await Future.delayed(const Duration(seconds: 1));
-    _attack();
-    await Future.delayed(const Duration(seconds: 1));
-    _attack();
+    // _attack();
+    // await Future.delayed(const Duration(seconds: 1));
+    // _attack();
+    // await Future.delayed(const Duration(seconds: 1));
+    // _attack();
+    // await Future.delayed(const Duration(seconds: 1));
+    // _attack();
     // ast one should be await
     await _attack();
   }
@@ -189,7 +184,7 @@ class _HomeState extends State<Home> {
 
       setState(() {
         if (info.responseCode >= 302 && info.responseCode >= 200) {
-          status = AppStatus.stopped;
+          status = _AppStatus.stopped;
           isError = true;
         }
         if (!msg.contains(info.msg)) {
@@ -204,7 +199,7 @@ class _HomeState extends State<Home> {
 
     // 3) if no errors:
     //    - start main loop
-    while (status != AppStatus.stopped) {
+    while (status != _AppStatus.stopped) {
       try {
         await controller.dance((_info) {
           _log(_info);
@@ -228,7 +223,7 @@ class _HomeState extends State<Home> {
           ),
         );
         setState(() {
-          status = AppStatus.stopped;
+          status = _AppStatus.stopped;
         });
         return;
       }
@@ -394,7 +389,7 @@ class _Logs extends StatelessWidget {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
-                    "Повідомлення від ${DateFormat("hh:mm:ss").format(info.dateTime)} - Скопійовано",
+                    "Повідомлення від ${DateFormat("hh:mm:ss", "uk").format(info.dateTime)} - Скопійовано",
                     style: const TextStyle(color: Colors.white),
                   ),
                   backgroundColor: secondaryColor,
@@ -421,6 +416,10 @@ class _Logs extends StatelessWidget {
                 Expanded(
                   child: Text(
                     description,
+                    maxLines:
+                        description.startsWith("Виник збій під час роботи")
+                            ? null
+                            : 3,
                     style: const TextStyle(
                       color: Color.fromARGB(255, 161, 161, 161),
                     ),
