@@ -23,6 +23,7 @@ dependencies:
   intl: ^0.17.0
   faker: ^2.0.0
   dio: ^4.0.4
+  logger: ^1.1.0
 
 dev_dependencies:
   flutter_test:

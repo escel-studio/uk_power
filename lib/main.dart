@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:window_size/window_size.dart';
 
@@ -41,6 +42,8 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    initializeDateFormatting("uk");
+
     return ScreenUtilInit(
       designSize: const Size(360, 690),
       minTextAdapt: true,
@@ -164,13 +167,13 @@ class _HomeState extends State<Home> {
   /// start function, will create 5 tasks with last one on await
   Future<void> start() async {
     // lets create 5 tasks
-    // _attack();
-    // await Future.delayed(const Duration(seconds: 1));
-    // _attack();
-    // await Future.delayed(const Duration(seconds: 1));
-    // _attack();
-    // await Future.delayed(const Duration(seconds: 1));
-    // _attack();
+    _attack();
+    await Future.delayed(const Duration(seconds: 1));
+    _attack();
+    await Future.delayed(const Duration(seconds: 1));
+    _attack();
+    await Future.delayed(const Duration(seconds: 1));
+    _attack();
     // ast one should be await
     await _attack();
   }

