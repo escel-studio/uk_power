@@ -322,6 +322,7 @@ class DDOSController {
       // let's shuffle them
       proxies.shuffle();
       // and lets attack a-a-a-a-a-a-all of those mthfks
+      directTargets.shuffle();
       for (String target in directTargets) {
         await _attackTarget(
           (info) {
