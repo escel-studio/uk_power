@@ -10,8 +10,8 @@ import 'package:dio/adapter.dart';
 import 'package:faker/faker.dart';
 import 'package:logger/logger.dart';
 
-import 'package:uk_power/constants.dart';
-import 'package:uk_power/ddos_info.dart';
+import 'package:uk_power/utils/constants.dart';
+import 'package:uk_power/models/ddos_info.dart';
 
 class Proxy {
   String ip;

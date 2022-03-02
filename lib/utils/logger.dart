@@ -1,5 +1,5 @@
 import 'package:intl/intl.dart';
-import 'package:uk_power/ddos_info.dart';
+import 'package:uk_power/models/ddos_info.dart';
 
 class Logger {
   static String logTitle(DDOSInfo info) {
