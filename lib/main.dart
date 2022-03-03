@@ -22,6 +22,6 @@ void main() {
       setWindowMinSize(const Size(500, 650));
     }
   }
-
+  
   runApp(const App());
 }
