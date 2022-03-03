@@ -17,48 +17,28 @@ class HomeStatus extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     EdgeInsets padding = const EdgeInsets.all(10.0);
-    IconData iconData;
-    Color color;
+    Color color = Colors.greenAccent;
 
-    if (isError) {
-      iconData = CupertinoIcons.clear_circled;
-      color = Colors.red;
-    } else {
-      iconData = CupertinoIcons.checkmark_circle;
-      color = Colors.greenAccent;
-    }
+    if (isError) color = Colors.red;
 
-    return Column(
-      children: [
-        // status icon
-        Padding(
-          padding: padding,
-          child: Icon(
-            iconData,
-            size: 35.h,
-            color: color,
-          ),
-        ),
-        // status text
-        Padding(
-          padding: padding,
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  text,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: color,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16.sp,
-                  ),
-                ),
+    return Padding(
+      padding: padding,
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              text,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              style: TextStyle(
+                color: color,
+                fontWeight: FontWeight.w600,
+                fontSize: 16.sp,
               ),
-            ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

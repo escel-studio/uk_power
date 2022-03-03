@@ -6,20 +6,12 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:uk_power/controllers/ddos_controller.dart';
 import 'package:uk_power/controllers/update_controller.dart';
 import 'package:uk_power/models/ddos_info.dart';
+import 'package:uk_power/models/enums.dart';
 import 'package:uk_power/utils/constants.dart';
 import 'package:uk_power/views/home/widgets/logs.dart';
 import 'package:uk_power/views/home/widgets/status.dart';
+import 'package:uk_power/views/home/widgets/switch.dart';
 import 'package:uk_power/views/home/widgets/title.dart';
-
-enum _AppStatus {
-  started,
-  stopped,
-}
-
-enum _AttackType {
-  easy,
-  hard,
-}
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -29,8 +21,8 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  _AppStatus appStatus = _AppStatus.stopped;
-  _AttackType attackType = _AttackType.easy;
+  AppStatus appStatus = AppStatus.stopped;
+  AttackType attackType = AttackType.easy;
   ScrollController loggerController = ScrollController();
   String msg = "";
   bool isError = false;
@@ -100,7 +92,7 @@ class _HomeState extends State<Home> {
           children: [
             HomeStatus(isError: isError, text: msg),
             // attack mods
-            _SwitchButton(
+            SwitchButton(
               callback: (type) {
                 setState(() {
                   attackType = type;
@@ -126,11 +118,11 @@ class _HomeState extends State<Home> {
     Color borderColor;
 
     switch (appStatus) {
-      case _AppStatus.started:
+      case AppStatus.started:
         title = "Зупинити атаку";
         borderColor = Colors.red;
         break;
-      case _AppStatus.stopped:
+      case AppStatus.stopped:
         title = "Розпочати атаку";
         borderColor = Colors.greenAccent;
         break;
@@ -166,9 +158,9 @@ class _HomeState extends State<Home> {
   }
 
   Future<void> _btnPressed() async {
-    if (appStatus == _AppStatus.stopped) {
+    if (appStatus == AppStatus.stopped) {
       setState(() {
-        appStatus = _AppStatus.started;
+        appStatus = AppStatus.started;
         logs.clear();
         isError = false;
         msg = "";
@@ -176,7 +168,7 @@ class _HomeState extends State<Home> {
       await start();
     } else {
       setState(() {
-        appStatus = _AppStatus.stopped;
+        appStatus = AppStatus.stopped;
       });
     }
   }
@@ -204,7 +196,7 @@ class _HomeState extends State<Home> {
 
       setState(() {
         if (info.responseCode >= 302 && info.responseCode >= 200) {
-          appStatus = _AppStatus.stopped;
+          appStatus = AppStatus.stopped;
           isError = true;
         }
         if (!msg.contains(info.msg)) {
@@ -219,8 +211,9 @@ class _HomeState extends State<Home> {
 
     // 3) if no errors:
     //    - start main loop
-    while (appStatus != _AppStatus.stopped) {
+    while (appStatus != AppStatus.stopped) {
       try {
+        //TODO: ADD ATTACK TYPE HANDLER
         await controller.dance((_info) {
           _log(_info);
 
@@ -243,7 +236,7 @@ class _HomeState extends State<Home> {
           ),
         );
         setState(() {
-          appStatus = _AppStatus.stopped;
+          appStatus = AppStatus.stopped;
         });
         return;
       }
@@ -262,112 +255,6 @@ class _HomeState extends State<Home> {
       loggerController.position.maxScrollExtent,
       curve: Curves.easeOut,
       duration: const Duration(milliseconds: 100),
-    );
-  }
-}
-
-// ignore: must_be_immutable
-class _SwitchButton extends StatefulWidget {
-  _AttackType type;
-  void Function(_AttackType) callback;
-
-  _SwitchButton({
-    Key? key,
-    required this.type,
-    required this.callback,
-  }) : super(key: key);
-
-  @override
-  State<_SwitchButton> createState() => __SwitchButtonState();
-}
-
-class __SwitchButtonState extends State<_SwitchButton> {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(15.0),
-      decoration: BoxDecoration(
-        // color: const Color(0xffF5F7FB),
-        borderRadius: BorderRadius.circular(5),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(15.0),
-              child: SizedBox(
-                height: 50.h,
-                child: ElevatedButton(
-                  style: ButtonStyle(
-                    backgroundColor: MaterialStateColor.resolveWith(
-                      (states) => Colors.transparent,
-                    ),
-                    shape: MaterialStateProperty.resolveWith(
-                      (states) => RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(18.0),
-                        side: BorderSide(
-                          color: widget.type == _AttackType.easy
-                              ? Colors.blueAccent
-                              : Colors.transparent,
-                        ),
-                      ),
-                    ),
-                  ),
-                  onPressed: () {
-                    widget.callback(_AttackType.easy);
-                    widget.type = _AttackType.easy;
-                  },
-                  child: Text(
-                    "Easy mode",
-                    style: TextStyle(
-                      color: widget.type == _AttackType.easy
-                          ? const Color(0xffF5F7FB)
-                          : const Color(0xffD0D0D0),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(15.0),
-              child: SizedBox(
-                height: 50.h,
-                child: ElevatedButton(
-                  style: ButtonStyle(
-                    backgroundColor: MaterialStateColor.resolveWith(
-                      (states) => Colors.transparent,
-                    ),
-                    shape: MaterialStateProperty.resolveWith(
-                      (states) => RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(18.0),
-                        side: BorderSide(
-                          color: widget.type == _AttackType.hard
-                              ? Colors.blueAccent
-                              : Colors.transparent,
-                        ),
-                      ),
-                    ),
-                  ),
-                  onPressed: () {
-                    widget.callback(_AttackType.hard);
-                    widget.type = _AttackType.hard;
-                  },
-                  child: Text(
-                    "Rage mode",
-                    style: TextStyle(
-                      color: widget.type == _AttackType.hard
-                          ? const Color(0xffF5F7FB)
-                          : const Color(0xffD0D0D0),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
