@@ -1,26 +1,17 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:uk_power/controllers/ddos_controller.dart';
 import 'package:uk_power/controllers/update_controller.dart';
 import 'package:uk_power/models/ddos_info.dart';
+import 'package:uk_power/models/enums.dart';
 import 'package:uk_power/utils/constants.dart';
 import 'package:uk_power/views/home/widgets/logs.dart';
 import 'package:uk_power/views/home/widgets/status.dart';
+import 'package:uk_power/views/home/widgets/switch.dart';
 import 'package:uk_power/views/home/widgets/title.dart';
-
-enum _AppStatus {
-  started,
-  stopped,
-}
-
-enum _AttackType {
-  easy,
-  hard,
-}
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -30,8 +21,8 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  _AppStatus appStatus = _AppStatus.stopped;
-  _AttackType attackType = _AttackType.easy;
+  AppStatus appStatus = AppStatus.stopped;
+  AttackType attackType = AttackType.easy;
   ScrollController loggerController = ScrollController();
   String msg = "";
   bool isError = false;
@@ -100,6 +91,15 @@ class _HomeState extends State<Home> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             HomeStatus(isError: isError, text: msg),
+            // attack mods
+            SwitchButton(
+              callback: (type) {
+                setState(() {
+                  attackType = type;
+                });
+              },
+              type: attackType,
+            ),
             // start/stop btn
             _getBtn(),
             // logs
@@ -117,12 +117,15 @@ class _HomeState extends State<Home> {
     String title;
     Color borderColor;
 
-    if (appStatus == _AppStatus.started) {
-      title = "Зупинити атаку";
-      borderColor = Colors.red;
-    } else {
-      title = "Розпочати атаку";
-      borderColor = Colors.greenAccent;
+    switch (appStatus) {
+      case AppStatus.started:
+        title = "Зупинити атаку";
+        borderColor = Colors.red;
+        break;
+      case AppStatus.stopped:
+        title = "Розпочати атаку";
+        borderColor = Colors.greenAccent;
+        break;
     }
 
     return Row(
@@ -155,9 +158,9 @@ class _HomeState extends State<Home> {
   }
 
   Future<void> _btnPressed() async {
-    if (appStatus == _AppStatus.stopped) {
+    if (appStatus == AppStatus.stopped) {
       setState(() {
-        appStatus = _AppStatus.started;
+        appStatus = AppStatus.started;
         logs.clear();
         isError = false;
         msg = "";
@@ -165,7 +168,7 @@ class _HomeState extends State<Home> {
       await start();
     } else {
       setState(() {
-        appStatus = _AppStatus.stopped;
+        appStatus = AppStatus.stopped;
       });
     }
   }
@@ -193,7 +196,7 @@ class _HomeState extends State<Home> {
 
       setState(() {
         if (info.responseCode >= 302 && info.responseCode >= 200) {
-          appStatus = _AppStatus.stopped;
+          appStatus = AppStatus.stopped;
           isError = true;
         }
         if (!msg.contains(info.msg)) {
@@ -208,8 +211,9 @@ class _HomeState extends State<Home> {
 
     // 3) if no errors:
     //    - start main loop
-    while (appStatus != _AppStatus.stopped) {
+    while (appStatus != AppStatus.stopped) {
       try {
+        //TODO: ADD ATTACK TYPE HANDLER
         await controller.dance((_info) {
           _log(_info);
 
@@ -232,7 +236,7 @@ class _HomeState extends State<Home> {
           ),
         );
         setState(() {
-          appStatus = _AppStatus.stopped;
+          appStatus = AppStatus.stopped;
         });
         return;
       }
