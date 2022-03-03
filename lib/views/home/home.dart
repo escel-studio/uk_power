@@ -95,6 +95,9 @@ class _HomeState extends State<Home> {
             SwitchButton(
               callback: (type) {
                 setState(() {
+                  if (attackType != type) {
+                    appStatus = AppStatus.stopped;
+                  }
                   attackType = type;
                 });
               },
