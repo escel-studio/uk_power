@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 
 /// app version
 const appVersion = '3.0.0';
+
 /// github app version
 const pubspecURL = "https://raw.githubusercontent.com/escel-studio/uk_power/main/pubspec.yaml";
+
 /// github releases url template
 const updateURL = "https://github.com/escel-studio/uk_power/releases/download/VERSION/";
+
 /// files
 const androidFile = "Android.apk";
 const windowsFile = "Windows.rar";
@@ -27,15 +30,13 @@ const bgColor = Color(0xFF212332);
 const defaultPadding = 16.0;
 
 /// our list of targets
-const sourceURL =
-    "https://raw.githubusercontent.com/senpaiburado/zxcvbnty/main/ttqtet.txt";
+const sourceURL = "https://raw.githubusercontent.com/senpaiburado/zxcvbnty/main/ttqtet.txt";
 
 /// ukrainian api's for attacks
-const apiURL = "http://rockstarbloggers.ru/hosts.json";
+const apiURL = "https://gitlab.com/cto.endel/atack_hosts/-/raw/master/hosts.json";
 
 /// global list of proxies
-const proxySource =
-    "https://proxylist.geonode.com/api/proxy-list?page=1&sort_by=lastChecked&sort_type=desc";
+const proxySource = "https://proxylist.geonode.com/api/proxy-list?page=1&sort_by=lastChecked&sort_type=desc";
 
 const initError = "Виникла помилка при звертанні до джерел: ";
 const invalidBodyError = "Неможливо розпізнати файл з цілями\n";
