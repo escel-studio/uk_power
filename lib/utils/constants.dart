@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-const appVersion = '2.0.3';
+const appVersion = '3.0.0';
 const pubspecURL = "https://raw.githubusercontent.com/escel-studio/uk_power/main/pubspec.yaml";
 
 /// default timeout for requests

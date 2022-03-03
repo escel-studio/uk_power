@@ -3,7 +3,7 @@ import 'package:logger/logger.dart';
 import 'package:uk_power/utils/constants.dart';
 
 class UpdateController {
-  static Future<bool> isUpdateAvailable() async {
+  Future<bool> needUpdate() async {
     Dio dio = Dio();
 
     try {
@@ -22,17 +22,31 @@ class UpdateController {
           .singleWhere(
             (element) => element.contains("version:"),
           )
-          .replaceFirst(
-            "version:",
-            "",
-          ).replaceRange(start, end, "")
+          .replaceFirst("version:", "")
           .trim();
-      return version == appVersion;
+      version = version.replaceRange(
+        version.indexOf("+"),
+        version.length,
+        "",
+      );
+
+      return _isVersionGreaterThan(version, appVersion);
     } catch (ex) {
       Logger().e(ex.toString());
       return false;
     }
   }
 
-  static Future<void> downloadUpdate() async {}
+  bool _isVersionGreaterThan(String newVersion, String currentVersion) {
+    List<String> currentV = currentVersion.split(".");
+    List<String> newV = newVersion.split(".");
+    bool a = false;
+    for (var i = 0; i <= 2; i++) {
+      a = int.parse(newV[i]) > int.parse(currentV[i]);
+      if (int.parse(newV[i]) != int.parse(currentV[i])) break;
+    }
+    return a;
+  }
+
+  Future<void> downloadUpdate() async {}
 }

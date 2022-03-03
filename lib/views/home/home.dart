@@ -48,7 +48,7 @@ class _HomeState extends State<Home> {
           IconButton(
             splashRadius: 25,
             onPressed: () async {
-              await UpdateController.isUpdateAvailable();
+              await UpdateController().needUpdate();
             },
             tooltip: "Перевірити оновлення",
             icon: const Icon(
