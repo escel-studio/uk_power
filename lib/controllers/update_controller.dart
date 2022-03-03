@@ -1,8 +1,14 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:logger/logger.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:uk_power/utils/constants.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class UpdateController {
+  String publishedVersion = "";
+
   Future<bool> needUpdate() async {
     Dio dio = Dio();
 
@@ -24,13 +30,13 @@ class UpdateController {
           )
           .replaceFirst("version:", "")
           .trim();
-      version = version.replaceRange(
+      publishedVersion = version.replaceRange(
         version.indexOf("+"),
         version.length,
         "",
       );
 
-      return _isVersionGreaterThan(version, appVersion);
+      return _isVersionGreaterThan(publishedVersion, appVersion);
     } catch (ex) {
       Logger().e(ex.toString());
       return false;
@@ -48,5 +54,22 @@ class UpdateController {
     return a;
   }
 
-  Future<void> downloadUpdate() async {}
+  Future<void> downloadUpdate() async {
+    String url = updateURL.replaceFirst("VERSION", publishedVersion);
+    String savePath = "";
+
+    if (Platform.isWindows) {
+      url += windowsFile;
+      savePath = (await getDownloadsDirectory())!.path + "\\$windowsFile";
+    } else if (Platform.isAndroid) {
+      url += androidFile;
+      savePath =
+          (await getApplicationDocumentsDirectory()).path + "\\$androidFile";
+    } else if (Platform.isLinux) {
+      url += linuxFile;
+      savePath = (await getDownloadsDirectory())!.path + "\\$linuxFile";
+    }
+
+    await launch(url);
+  }
 }

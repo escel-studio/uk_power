@@ -1,3 +1,4 @@
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -36,6 +37,45 @@ class _HomeState extends State<Home> {
   bool isError = false;
   List<DDOSInfo> logs = [];
 
+  void _checkForUpdate({bool init = false}) async {
+    UpdateController updateController = UpdateController();
+
+    if (await updateController.needUpdate()) {
+      AwesomeDialog(
+        context: context,
+        dialogType: DialogType.QUESTION,
+        title: "Доступне оновлення",
+        desc:
+            "Ми знайшли новішу версію додатку - ${updateController.publishedVersion},"
+            "Ви використовуєте - $appVersion.\n"
+            "Бажаєте оновитись?",
+        btnOkText: "Так",
+        btnCancelText: "Ні",
+        btnOkOnPress: () async {
+          await updateController.downloadUpdate();
+        },
+        btnCancelOnPress: () {},
+      ).show();
+    } else {
+      if (!init) {
+        AwesomeDialog(
+          context: context,
+          dialogType: DialogType.SUCCES,
+          title: "Оновлення не потрібні",
+          desc: "Ви вже використовуєте останню версію додатку!",
+          btnOkText: "Гаразд",
+          btnOkOnPress: () {},
+        ).show();
+      }
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _checkForUpdate(init: true);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,9 +87,7 @@ class _HomeState extends State<Home> {
         actions: [
           IconButton(
             splashRadius: 25,
-            onPressed: () async {
-              await UpdateController().needUpdate();
-            },
+            onPressed: _checkForUpdate,
             tooltip: "Перевірити оновлення",
             icon: const Icon(
               CupertinoIcons.refresh,

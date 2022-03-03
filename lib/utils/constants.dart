@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
 
+/// app version
 const appVersion = '3.0.0';
+/// github app version
 const pubspecURL = "https://raw.githubusercontent.com/escel-studio/uk_power/main/pubspec.yaml";
+/// github releases url template
+const updateURL = "https://github.com/escel-studio/uk_power/releases/download/VERSION/";
+/// files
+const androidFile = "Android.apk";
+const windowsFile = "Windows.rar";
+const linuxFile = "Linux.zip";
 
 /// default timeout for requests
 const timeout = Duration(seconds: 15);
