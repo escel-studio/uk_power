@@ -1,7 +1,6 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:uk_power/controllers/ddos_controller.dart';
@@ -100,6 +99,15 @@ class _HomeState extends State<Home> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             HomeStatus(isError: isError, text: msg),
+            // attack mods
+            _SwitchButton(
+              callback: (type) {
+                setState(() {
+                  attackType = type;
+                });
+              },
+              type: attackType,
+            ),
             // start/stop btn
             _getBtn(),
             // logs
@@ -117,12 +125,15 @@ class _HomeState extends State<Home> {
     String title;
     Color borderColor;
 
-    if (appStatus == _AppStatus.started) {
-      title = "Зупинити атаку";
-      borderColor = Colors.red;
-    } else {
-      title = "Розпочати атаку";
-      borderColor = Colors.greenAccent;
+    switch (appStatus) {
+      case _AppStatus.started:
+        title = "Зупинити атаку";
+        borderColor = Colors.red;
+        break;
+      case _AppStatus.stopped:
+        title = "Розпочати атаку";
+        borderColor = Colors.greenAccent;
+        break;
     }
 
     return Row(
@@ -251,6 +262,112 @@ class _HomeState extends State<Home> {
       loggerController.position.maxScrollExtent,
       curve: Curves.easeOut,
       duration: const Duration(milliseconds: 100),
+    );
+  }
+}
+
+// ignore: must_be_immutable
+class _SwitchButton extends StatefulWidget {
+  _AttackType type;
+  void Function(_AttackType) callback;
+
+  _SwitchButton({
+    Key? key,
+    required this.type,
+    required this.callback,
+  }) : super(key: key);
+
+  @override
+  State<_SwitchButton> createState() => __SwitchButtonState();
+}
+
+class __SwitchButtonState extends State<_SwitchButton> {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(15.0),
+      decoration: BoxDecoration(
+        // color: const Color(0xffF5F7FB),
+        borderRadius: BorderRadius.circular(5),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(15.0),
+              child: SizedBox(
+                height: 50.h,
+                child: ElevatedButton(
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateColor.resolveWith(
+                      (states) => Colors.transparent,
+                    ),
+                    shape: MaterialStateProperty.resolveWith(
+                      (states) => RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18.0),
+                        side: BorderSide(
+                          color: widget.type == _AttackType.easy
+                              ? Colors.blueAccent
+                              : Colors.transparent,
+                        ),
+                      ),
+                    ),
+                  ),
+                  onPressed: () {
+                    widget.callback(_AttackType.easy);
+                    widget.type = _AttackType.easy;
+                  },
+                  child: Text(
+                    "Easy mode",
+                    style: TextStyle(
+                      color: widget.type == _AttackType.easy
+                          ? const Color(0xffF5F7FB)
+                          : const Color(0xffD0D0D0),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(15.0),
+              child: SizedBox(
+                height: 50.h,
+                child: ElevatedButton(
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateColor.resolveWith(
+                      (states) => Colors.transparent,
+                    ),
+                    shape: MaterialStateProperty.resolveWith(
+                      (states) => RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18.0),
+                        side: BorderSide(
+                          color: widget.type == _AttackType.hard
+                              ? Colors.blueAccent
+                              : Colors.transparent,
+                        ),
+                      ),
+                    ),
+                  ),
+                  onPressed: () {
+                    widget.callback(_AttackType.hard);
+                    widget.type = _AttackType.hard;
+                  },
+                  child: Text(
+                    "Rage mode",
+                    style: TextStyle(
+                      color: widget.type == _AttackType.hard
+                          ? const Color(0xffF5F7FB)
+                          : const Color(0xffD0D0D0),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
