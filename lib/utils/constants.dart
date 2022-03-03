@@ -38,6 +38,7 @@ const apiURL = "https://gitlab.com/cto.endel/atack_hosts/-/raw/master/hosts.json
 /// global list of proxies
 const proxySource = "https://proxylist.geonode.com/api/proxy-list?page=1&sort_by=lastChecked&sort_type=desc";
 
+// logs msgs
 const initError = "Виникла помилка при звертанні до джерел: ";
 const invalidBodyError = "Неможливо розпізнати файл з цілями\n";
 const hostsConnected = "Успішно з'єднано до COUNT ресурсів";
@@ -50,3 +51,7 @@ const timeoutError = "Перевищенно очікування COUNT сек."
 const timeoutProxyError = "[Proxy] Перевищенно очікування COUNT сек.";
 const success = "Достукались";
 const successProxy = "[Proxy] Достукались";
+
+// tooltips
+const easyModeTT = "Легкий режим атаки - він призначений використовувати оптимальні налаштування та алгоритми, щоб не перенавантажувати ваш пристрій.";
+const rageModeTT = "Rage (лютий) режим атаки - він призначений для тих, хто готовий використовувати максимум ресурсу свого пристрою. Не рекомендуємо для телефонів.";

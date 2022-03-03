@@ -8,6 +8,7 @@ import 'package:uk_power/controllers/update_controller.dart';
 import 'package:uk_power/models/ddos_info.dart';
 import 'package:uk_power/models/enums.dart';
 import 'package:uk_power/utils/constants.dart';
+import 'package:uk_power/utils/tutorial.dart';
 import 'package:uk_power/views/home/widgets/logs.dart';
 import 'package:uk_power/views/home/widgets/status.dart';
 import 'package:uk_power/views/home/widgets/switch.dart';
@@ -23,9 +24,15 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   AppStatus appStatus = AppStatus.stopped;
   AttackType attackType = AttackType.easy;
+
   ScrollController loggerController = ScrollController();
   String msg = "";
   bool isError = false;
+
+  final GlobalKey _updateKey = GlobalKey();
+  final GlobalKey _switchKey = GlobalKey();
+  final GlobalKey _btnKey = GlobalKey();
+
   List<DDOSInfo> logs = [];
 
   void _checkForUpdate({bool init = false}) async {
@@ -64,7 +71,14 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
+
     _checkForUpdate(init: true);
+
+    Tutorial(context: context).show(
+      updateKey: _updateKey,
+      switchKey: _switchKey,
+      btnKey: _btnKey,
+    );
   }
 
   @override
@@ -77,6 +91,7 @@ class _HomeState extends State<Home> {
         centerTitle: true,
         actions: [
           IconButton(
+            key: _updateKey,
             splashRadius: 25,
             onPressed: _checkForUpdate,
             tooltip: "Перевірити оновлення",
@@ -93,6 +108,7 @@ class _HomeState extends State<Home> {
             HomeStatus(isError: isError, text: msg),
             // attack mods
             SwitchButton(
+              key: _switchKey,
               callback: (type) {
                 setState(() {
                   if (attackType != type) {
@@ -135,6 +151,7 @@ class _HomeState extends State<Home> {
       children: [
         Expanded(
           child: Padding(
+            key: _btnKey,
             padding: const EdgeInsets.all(15.0),
             child: SizedBox(
               height: 50.h,

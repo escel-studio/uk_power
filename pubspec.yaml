@@ -27,6 +27,8 @@ dependencies:
   path_provider: ^2.0.9
   url_launcher: ^6.0.20
   awesome_dialog: ^2.1.2
+  tutorial_coach_mark: ^1.2.1
+  shared_preferences: ^2.0.13
 
 dev_dependencies:
   flutter_test:
