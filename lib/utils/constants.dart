@@ -14,6 +14,8 @@ const androidFile = "Android.apk";
 const windowsFile = "Windows.rar";
 const linuxFile = "Linux.zip";
 
+const logsFileName = "uk-power-logs.log";
+
 /// default timeout for requests
 const timeout = Duration(seconds: 15);
 

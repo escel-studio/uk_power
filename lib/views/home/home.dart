@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:uk_power/controllers/ddos_controller.dart';
 import 'package:uk_power/controllers/update_controller.dart';
 import 'package:uk_power/models/ddos_info.dart';
 import 'package:uk_power/models/enums.dart';
 import 'package:uk_power/utils/constants.dart';
+import 'package:uk_power/utils/logger.dart';
 import 'package:uk_power/utils/tutorial.dart';
 import 'package:uk_power/views/home/widgets/logs.dart';
 import 'package:uk_power/views/home/widgets/status.dart';
@@ -27,8 +29,11 @@ class _HomeState extends State<Home> {
   AttackType attackType = AttackType.easy;
 
   ScrollController loggerController = ScrollController();
+
   String msg = "";
+
   bool isError = false;
+  bool allowLogsToFile = true;
 
   final GlobalKey _updateKey = GlobalKey();
   final GlobalKey _settingsKey = GlobalKey();
@@ -82,6 +87,21 @@ class _HomeState extends State<Home> {
       btnKey: _btnKey,
       settingsKey: _settingsKey,
     );
+
+    SharedPreferences.getInstance().then(
+      (pref) {
+        bool? allowed = pref.getBool('allowLogsToFile');
+
+        if (allowed == null) {
+          allowLogsToFile = true;
+          pref.setBool('allowLogsToFile', true);
+        } else {
+          allowLogsToFile = allowed;
+        }
+
+        setState(() {});
+      },
+    );
   }
 
   @override
@@ -90,14 +110,30 @@ class _HomeState extends State<Home> {
       appBar: AppBar(
         elevation: 0.0,
         backgroundColor: Colors.transparent,
-        leading: IconButton(
-          key: _settingsKey,
-          splashRadius: 25,
-          onPressed: () {},
-          tooltip: "Налаштування",
-          icon: const Icon(
+        leading: PopupMenuButton(
+          elevation: 5.0,
+          child: const Icon(
             CupertinoIcons.ellipsis_vertical,
           ),
+          itemBuilder: (context) => [
+            PopupMenuItem(
+              child: StatefulBuilder(
+                builder: (_context, _setState) => CheckboxListTile(
+                  activeColor: primaryColor,
+                  value: allowLogsToFile,
+                  onChanged: (value) {
+                    _setState(() => allowLogsToFile = value!);
+                    SharedPreferences.getInstance().then(
+                      (pref) {
+                        pref.setBool('allowLogsToFile', allowLogsToFile);
+                      },
+                    );
+                  },
+                  title: const Text('Дозволити логування'),
+                ),
+              ),
+            ),
+          ],
         ),
         title: const HomeTitle(),
         actions: [
@@ -280,6 +316,8 @@ class _HomeState extends State<Home> {
 
   /// update logs
   void _log(DDOSInfo info) async {
+    if (allowLogsToFile) Logger.logToFile(info);
+
     if (appStatus == AppStatus.stopped) return;
 
     setState(() {
