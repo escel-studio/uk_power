@@ -1,6 +1,7 @@
-import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:uk_power/controllers/ddos_controller.dart';
@@ -265,9 +266,12 @@ class _HomeState extends State<Home> {
 
   /// update logs
   void _log(DDOSInfo info) async {
+    if (appStatus == AppStatus.stopped) return;
+
     setState(() {
       logs.add(info);
     });
+
     // lets take a break for a 1 seconds
     await Future.delayed(const Duration(seconds: 1));
     // lets scroll to the latest logs
