@@ -19,6 +19,9 @@ const logsFileName = "uk-power-logs.log";
 /// default timeout for requests
 const timeout = Duration(seconds: 15);
 
+/// max threads count
+const maxThreads = 5;
+
 /// primary color
 const primaryColor = Color(0xFF2697FF);
 
@@ -52,8 +55,8 @@ const tryAgainHosts = "Спробуйте ще раз, щось пішло не 
 const tryAgainDirect = "Неможливо отримати список цілей\n";
 const hostsKW = "HOSTS: ";
 const directKW = "DIRECT: ";
-const timeoutError = "Перевищенно очікування COUNT сек.";
-const timeoutProxyError = "[Proxy] Перевищенно очікування COUNT сек.";
+const timeoutError = "Перевищено очікування COUNT сек.";
+const timeoutProxyError = "[Proxy] Перевищено очікування COUNT сек.";
 const success = "Достукались";
 const successProxy = "[Proxy] Достукались";
 

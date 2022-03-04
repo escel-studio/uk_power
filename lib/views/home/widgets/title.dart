@@ -19,7 +19,7 @@ class HomeTitle extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
-                  fontSize: 21.sp,
+                  fontSize: 16.sp,
                 ),
               ),
             ),

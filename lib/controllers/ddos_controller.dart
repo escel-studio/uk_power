@@ -33,8 +33,10 @@ class Proxy {
 class DDOSController {
   List<String> hosts = [defaultHost];
   List<String> directTargets = [];
+
   Dio _dio = Dio();
-  final int maxIterations = 500;
+  
+  final int maxIterations = 5000;
 
   /// Init hosts and direct targets
   Future<void> init(void Function(DDOSInfo) callback) async {
