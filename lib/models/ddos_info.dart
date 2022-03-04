@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:intl/intl.dart';
+
 enum DDOSStatus {
   none,
   success,
@@ -66,7 +68,10 @@ class DDOSInfo {
 
   @override
   String toString() {
-    return 'DDOSInfo(msg: $msg, target: $target, dateTime: $dateTime, responseCode: $responseCode, status: $status)';
+    return "DateTime: ${DateFormat("dd.MM.yy hh:mm:ss").format(dateTime)}, "
+        "Resource: ${target.toString()}, "
+        "Status: $responseCode, "
+        "Msg: $msg;";
   }
 
   @override

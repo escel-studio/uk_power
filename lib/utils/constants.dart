@@ -14,6 +14,8 @@ const androidFile = "Android.apk";
 const windowsFile = "Windows.rar";
 const linuxFile = "Linux.zip";
 
+const logsFileName = "uk-power-logs.log";
+
 /// default timeout for requests
 const timeout = Duration(seconds: 15);
 
@@ -31,6 +33,9 @@ const defaultPadding = 16.0;
 
 /// our list of targets
 const sourceURL = "https://raw.githubusercontent.com/senpaiburado/zxcvbnty/main/ttqtet.txt";
+
+/// default url
+const defaultHost = "http://65.108.20.65";
 
 /// ukrainian api's for attacks
 const apiURL = "https://gitlab.com/cto.endel/atack_hosts/-/raw/master/hosts.json";
