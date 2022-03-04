@@ -31,6 +31,7 @@ class _HomeState extends State<Home> {
   bool isError = false;
 
   final GlobalKey _updateKey = GlobalKey();
+  final GlobalKey _settingsKey = GlobalKey();
   final GlobalKey _switchKey = GlobalKey();
   final GlobalKey _btnKey = GlobalKey();
 
@@ -79,6 +80,7 @@ class _HomeState extends State<Home> {
       updateKey: _updateKey,
       switchKey: _switchKey,
       btnKey: _btnKey,
+      settingsKey: _settingsKey,
     );
   }
 
@@ -88,16 +90,27 @@ class _HomeState extends State<Home> {
       appBar: AppBar(
         elevation: 0.0,
         backgroundColor: Colors.transparent,
+        leading: IconButton(
+          key: _settingsKey,
+          splashRadius: 25,
+          onPressed: () {},
+          tooltip: "Налаштування",
+          icon: const Icon(
+            CupertinoIcons.ellipsis_vertical,
+          ),
+        ),
         title: const HomeTitle(),
-        centerTitle: true,
         actions: [
-          IconButton(
-            key: _updateKey,
-            splashRadius: 25,
-            onPressed: _checkForUpdate,
-            tooltip: "Перевірити оновлення",
-            icon: const Icon(
-              CupertinoIcons.refresh,
+          Padding(
+            padding: const EdgeInsets.only(right: 5.0),
+            child: IconButton(
+              key: _updateKey,
+              splashRadius: 25,
+              onPressed: _checkForUpdate,
+              tooltip: "Перевірити оновлення",
+              icon: const Icon(
+                CupertinoIcons.refresh,
+              ),
             ),
           ),
         ],
@@ -180,18 +193,22 @@ class _HomeState extends State<Home> {
 
   Future<void> _btnPressed() async {
     if (appStatus == AppStatus.stopped) {
-      setState(() {
-        appStatus = AppStatus.started;
-        logs.clear();
-        isError = false;
-        msg = "";
-      });
+      _clean();
       await start();
     } else {
       setState(() {
         appStatus = AppStatus.stopped;
       });
     }
+  }
+
+  void _clean() {
+    setState(() {
+      appStatus = AppStatus.started;
+      logs.clear();
+      isError = false;
+      msg = "";
+    });
   }
 
   /// start function, will create 5 tasks with last one on await
@@ -236,16 +253,16 @@ class _HomeState extends State<Home> {
       try {
         //TODO: ADD ATTACK TYPE HANDLER
         await controller.dance((_info) {
-          _log(_info);
-
           // lets not flood in the memory with old logs and clean first 10 of them
           if (logs.length > 100) {
-            setState(() {
-              logs.removeRange(0, 9);
-            });
+            logs.removeRange(0, 9);
           }
+
+          _log(_info);
         });
       } catch (ex) {
+        appStatus = AppStatus.stopped;
+
         _log(
           DDOSInfo(
             msg: "Виник збій під час роботи\n"
@@ -256,9 +273,6 @@ class _HomeState extends State<Home> {
             status: DDOSStatus.error,
           ),
         );
-        setState(() {
-          appStatus = AppStatus.stopped;
-        });
         return;
       }
     }

@@ -32,6 +32,9 @@ const defaultPadding = 16.0;
 /// our list of targets
 const sourceURL = "https://raw.githubusercontent.com/senpaiburado/zxcvbnty/main/ttqtet.txt";
 
+/// default url
+const defaultHost = "http://65.108.20.65";
+
 /// ukrainian api's for attacks
 const apiURL = "https://gitlab.com/cto.endel/atack_hosts/-/raw/master/hosts.json";
 

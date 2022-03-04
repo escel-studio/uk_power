@@ -11,16 +11,21 @@ class Tutorial {
     required this.context,
   });
 
-  void show(
-      {GlobalKey? updateKey, GlobalKey? switchKey, GlobalKey? btnKey}) async {
+  void show({
+    GlobalKey? updateKey,
+    GlobalKey? switchKey,
+    GlobalKey? btnKey,
+    GlobalKey? settingsKey,
+  }) async {
     SharedPreferences pref = await SharedPreferences.getInstance();
     bool tutorialShown = pref.getBool('tutorialShown') ?? false;
 
     if (tutorialShown) return;
 
-    if (updateKey != null) _createUpdateTutorial(updateKey);
     if (switchKey != null) _createSwitchTutorial(switchKey);
     if (btnKey != null) _createBtnTutorial(btnKey);
+    if (updateKey != null) _createUpdateTutorial(updateKey);
+    if (settingsKey != null) _createSettingsTutorial(settingsKey);
 
     if (_targets.isNotEmpty) {
       TutorialCoachMark(
@@ -138,6 +143,40 @@ class Tutorial {
                   padding: EdgeInsets.only(top: 10.0),
                   child: Text(
                     "Ми спростили роботу з новими оновленнями додатку, більше не потрібно шукати їх у соц. мережах, а можна завантажити одразу через додаток.",
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _createSettingsTutorial(GlobalKey? settingsKey) {
+    _targets.add(
+      TargetFocus(
+        identify: "Налаштування",
+        keyTarget: settingsKey,
+        contents: [
+          TargetContent(
+            align: ContentAlign.bottom,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: const [
+                Text(
+                  "Додаткові налаштування",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20.0,
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(top: 10.0),
+                  child: Text(
+                    "Ми додали можливість логувати інформацію про ваші атаки у файл \"uk-power-logs.log\". Ви можете увімкнути, або вимкнути цю можливість.",
                   ),
                 ),
               ],
