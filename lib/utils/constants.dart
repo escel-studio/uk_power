@@ -11,16 +11,13 @@ const updateURL = "https://github.com/escel-studio/uk_power/releases/download/VE
 
 /// files
 const androidFile = "Android.apk";
-const windowsFile = "Windows.rar";
+const windowsFile = "Windows.zip";
 const linuxFile = "Linux.zip";
 
 const logsFileName = "uk-power-logs.log";
 
 /// default timeout for requests
 const timeout = Duration(seconds: 15);
-
-/// max threads count
-const maxThreads = 5;
 
 /// primary color
 const primaryColor = Color(0xFF2697FF);

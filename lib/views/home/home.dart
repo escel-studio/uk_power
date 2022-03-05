@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:isolate';
 
 import 'package:flutter/cupertino.dart';
@@ -234,6 +235,7 @@ class _HomeState extends State<Home> {
   Future<void> _btnPressed() async {
     if (appStatus == AppStatus.stopped) {
       _clean();
+      _killThreadsTasks();
       await start();
     } else {
       _killThreadsTasks();
@@ -253,15 +255,17 @@ class _HomeState extends State<Home> {
   }
 
   void _killThreadsTasks() {
-    if (_ports.isNotEmpty) {
-      for (var port in _ports) {
-        port.close();
-      }
-    }
-
     for (Isolate i in _isolates) {
       i.kill(priority: Isolate.immediate);
     }
+
+    _isolates.clear();
+
+    for (ReceivePort port in _ports) {
+      port.close();
+    }
+
+    _ports.clear();
   }
 
   /// start function, will create 5 tasks with last one on await
@@ -290,6 +294,8 @@ class _HomeState extends State<Home> {
   }
 
   Future<void> _rageMode() async {
+    int maxThreads = Platform.numberOfProcessors;
+
     for (int i = 0; i < maxThreads; ++i) {
       ReceivePort receiverPort = ReceivePort("Thread #$i");
       _ports.add(receiverPort);
