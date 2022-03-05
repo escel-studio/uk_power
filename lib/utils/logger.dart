@@ -7,7 +7,7 @@ import 'package:uk_power/models/ddos_info.dart';
 import 'package:uk_power/utils/constants.dart';
 
 class Logger {
-  static Directory? _documents;
+  static Directory? _outDir;
 
   static String logTitle(DDOSInfo info) {
     String msg = "[${DateFormat("dd.MM.yy hh:mm:ss").format(info.dateTime)}] ";
@@ -51,20 +51,22 @@ class Logger {
     return msg;
   }
 
-  static void logToFile(DDOSInfo info) async {
-    _documents ??= await getApplicationDocumentsDirectory();
+  static Future<void> logToFile(DDOSInfo info) async {
+    String pathToFile = "";
 
-    String pathToFile = "${_documents!.path}\\$logsFileName";
-    File logsFile = File(pathToFile);
-
-    String data = "";
-
-    try {
-      data = await logsFile.readAsString();
-    } catch (ex) {
-      l.Logger().e(ex);
+    if (Platform.isWindows) {
+      _outDir ??= await getApplicationDocumentsDirectory();
+      pathToFile += "${_outDir!.path}\\$logsFileName";
+    } else if (Platform.isAndroid) {
+      _outDir ??= await getExternalStorageDirectory();
+      pathToFile += "${_outDir!.path}/$logsFileName";
     }
 
-    logsFile.writeAsString(data + info.toString() + "\n", flush: true);
+    File logsFile = File(pathToFile);
+    await logsFile.writeAsString(
+      info.toString() + "\n",
+      flush: true,
+      mode: FileMode.append,
+    );
   }
 }

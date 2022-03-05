@@ -93,7 +93,7 @@ class _SwitchButtonState extends State<SwitchButton> {
                           side: BorderSide(
                             width: widget.type == AttackType.rage ? 1.2 : 1.0,
                             color: widget.type == AttackType.rage
-                                ? Colors.redAccent
+                                ? Colors.pink
                                 : Colors.white60,
                           ),
                         ),

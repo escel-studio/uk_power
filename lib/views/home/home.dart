@@ -44,8 +44,8 @@ class _HomeState extends State<Home> {
   final GlobalKey _btnKey = GlobalKey();
 
   List<DDOSInfo> logs = [];
-  List<ReceivePort> _ports = [];
-  List<Isolate> _isolates = [];
+  List<ReceivePort> ports = [];
+  List<Isolate> isolates = [];
 
   void _checkForUpdate({bool init = false}) async {
     UpdateController updateController = UpdateController();
@@ -115,32 +115,38 @@ class _HomeState extends State<Home> {
       appBar: AppBar(
         elevation: 0.0,
         backgroundColor: Colors.transparent,
-        leading: PopupMenuButton(
-          key: _settingsKey,
-          tooltip: "Налаштування",
-          elevation: 5.0,
-          child: const Icon(
-            CupertinoIcons.ellipsis_vertical,
-          ),
-          itemBuilder: (context) => [
-            PopupMenuItem(
-              child: StatefulBuilder(
-                builder: (_context, _setState) => CheckboxListTile(
-                  activeColor: primaryColor,
-                  value: allowLogsToFile,
-                  onChanged: (value) {
-                    _setState(() => allowLogsToFile = value!);
-                    SharedPreferences.getInstance().then(
-                      (pref) {
-                        pref.setBool('allowLogsToFile', allowLogsToFile);
-                      },
-                    );
-                  },
-                  title: const Text('Дозволити логування'),
-                ),
+        leading: ClipRRect(
+          borderRadius: BorderRadius.circular(50),
+          child: Material(
+            color: Colors.transparent,
+            child: PopupMenuButton(
+              key: _settingsKey,
+              tooltip: "Налаштування",
+              elevation: 5.0,
+              child: const Icon(
+                CupertinoIcons.ellipsis_vertical,
               ),
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                  child: StatefulBuilder(
+                    builder: (_context, _setState) => CheckboxListTile(
+                      activeColor: primaryColor,
+                      value: allowLogsToFile,
+                      onChanged: (value) {
+                        _setState(() => allowLogsToFile = value!);
+                        SharedPreferences.getInstance().then(
+                          (pref) {
+                            pref.setBool('allowLogsToFile', allowLogsToFile);
+                          },
+                        );
+                      },
+                      title: const Text('Дозволити логування'),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
         title: const HomeTitle(),
         actions: [
@@ -257,17 +263,17 @@ class _HomeState extends State<Home> {
   }
 
   void _killThreadsTasks() {
-    for (Isolate i in _isolates) {
-      i.kill(priority: Isolate.immediate);
+    for (Isolate i in isolates) {
+      i.kill(priority: Isolate.beforeNextEvent);
     }
 
-    _isolates.clear();
+    isolates.clear();
 
-    for (ReceivePort port in _ports) {
+    for (ReceivePort port in ports) {
       port.close();
     }
 
-    _ports.clear();
+    ports.clear();
   }
 
   /// start function, will create 5 tasks with last one on await
@@ -299,10 +305,10 @@ class _HomeState extends State<Home> {
     int maxThreads = Platform.numberOfProcessors;
 
     for (int i = 0; i < maxThreads; ++i) {
-      ReceivePort receiverPort = ReceivePort("Thread #$i");
-      _ports.add(receiverPort);
+      ReceivePort receiverPort = ReceivePort("Thread #$i port");
+      ports.add(receiverPort);
 
-      _isolates.add(
+      isolates.add(
         await Isolate.spawn(
           rageAttack,
           receiverPort.sendPort,
@@ -312,39 +318,43 @@ class _HomeState extends State<Home> {
 
       receiverPort.listen((data) {
         if (data is Map<String, dynamic>) {
-          String msg = data['msg'];
-          DDOSInfo info = data['info'];
+          String _msg = data['msg'];
+          DDOSInfo _info = data['info'];
 
-          switch (msg) {
+          switch (_msg) {
             case "stop":
-              _log(info);
+              setState(() {
+                appStatus = AppStatus.stopped;
+                isError = true;
+              });
+              _log(_info);
+              _killThreadsTasks();
               break;
             case "log":
-              _log(info);
+              _log(_info);
               break;
             case "info":
               setState(() {
-                if (info.responseCode >= 302 && info.responseCode >= 200) {
+                if (_info.responseCode >= 302 && _info.responseCode >= 200) {
                   appStatus = AppStatus.stopped;
                   isError = true;
                   _killThreadsTasks();
                 }
-                if (!msg.contains(info.msg)) {
+                if (!msg.contains(_info.msg)) {
                   if (msg.isNotEmpty) msg += "\n";
-                  msg += info.msg;
+                  msg += _info.msg;
                 }
               });
+              _log(_info);
               break;
           }
-
-          _log(info);
         } else if (data is String) {
           if (data == "stop") {
             setState(() {
               appStatus = AppStatus.stopped;
               isError = true;
-              _killThreadsTasks();
             });
+            _killThreadsTasks();
           }
         }
 
@@ -410,7 +420,7 @@ class _HomeState extends State<Home> {
 
   /// update logs
   void _log(DDOSInfo info) async {
-    if (allowLogsToFile) Logger.logToFile(info);
+    if (allowLogsToFile) await Logger.logToFile(info);
 
     if (appStatus == AppStatus.stopped) return;
 
