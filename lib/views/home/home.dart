@@ -56,7 +56,7 @@ class _HomeState extends State<Home> {
         dialogType: DialogType.QUESTION,
         title: "Доступне оновлення",
         desc:
-            "Ми знайшли новішу версію додатку - ${updateController.publishedVersion},"
+            "Ми знайшли новішу версію додатку - ${updateController.publishedVersion}, "
             "Ви використовуєте - $appVersion.\n"
             "Бажаєте оновитись?",
         btnOkText: "Так",
