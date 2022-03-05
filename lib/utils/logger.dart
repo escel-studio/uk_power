@@ -60,6 +60,9 @@ class Logger {
     } else if (Platform.isAndroid) {
       _outDir ??= await getExternalStorageDirectory();
       pathToFile += "${_outDir!.path}/$logsFileName";
+    } else {
+      _outDir ??= await getApplicationDocumentsDirectory();
+      pathToFile += "${_outDir!.path}/$logsFileName";
     }
 
     File logsFile = File(pathToFile);
