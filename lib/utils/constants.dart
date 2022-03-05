@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 /// app version
-const appVersion = '3.0.0';
+const appVersion = '3.0.1';
 
 /// github app version
 const pubspecURL = "https://raw.githubusercontent.com/escel-studio/uk_power/main/pubspec.yaml";
