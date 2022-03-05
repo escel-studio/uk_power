@@ -116,6 +116,8 @@ class _HomeState extends State<Home> {
         elevation: 0.0,
         backgroundColor: Colors.transparent,
         leading: PopupMenuButton(
+          key: _settingsKey,
+          tooltip: "Налаштування",
           elevation: 5.0,
           child: const Icon(
             CupertinoIcons.ellipsis_vertical,
