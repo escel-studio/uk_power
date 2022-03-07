@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 /// app version
-const appVersion = '3.0.1';
+const appVersion = '3.1.0';
 
 /// github app version
 const pubspecURL = "https://raw.githubusercontent.com/escel-studio/uk_power/main/pubspec.yaml";
@@ -33,6 +33,8 @@ const defaultPadding = 16.0;
 
 /// our list of targets
 const sourceURL = "https://raw.githubusercontent.com/senpaiburado/zxcvbnty/main/ttqtet.txt";
+/// supportive list of targets
+const supportURL = "https://raw.githubusercontent.com/Kadzup/ygadiyes/main/smdvp.txt";
 
 /// default url
 const defaultHost = "http://65.108.20.65";
@@ -40,14 +42,20 @@ const defaultHost = "http://65.108.20.65";
 /// ukrainian api's for attacks
 const apiURL = "https://gitlab.com/cto.endel/atack_hosts/-/raw/master/hosts.json";
 
-/// global list of proxies
-const proxySource = "https://proxylist.geonode.com/api/proxy-list?page=1&sort_by=lastChecked&sort_type=desc";
+// global list of proxies
+/// API proxies
+const proxySource1 = "https://proxylist.geonode.com/api/proxy-list?page=1&sort_by=lastChecked&sort_type=desc";
+/// Updatable list of proxies
+const proxySource2 = "http://spys.me/proxy.txt";
+/// Our list of proxies (Github)
+const proxySource3 = "https://raw.githubusercontent.com/Kadzup/ygadiyes/main/wwg.txt";
 
 // logs msgs
 const initError = "Виникла помилка при звертанні до джерел: ";
 const invalidBodyError = "Неможливо розпізнати файл з цілями\n";
 const hostsConnected = "Успішно з'єднано до COUNT ресурсів";
 const directFound = "Успішно знайдено COUNT цілей";
+const proxiesFound = "Успішно отримано ~COUNT проксі";
 const tryAgainHosts = "Спробуйте ще раз, щось пішло не так\n";
 const tryAgainDirect = "Неможливо отримати список цілей\n";
 const hostsKW = "HOSTS: ";

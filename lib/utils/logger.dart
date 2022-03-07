@@ -2,8 +2,8 @@ import 'dart:io';
 
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:logger/logger.dart' as l;
 import 'package:uk_power/models/ddos_info.dart';
+import 'package:uk_power/models/enums.dart';
 import 'package:uk_power/utils/constants.dart';
 
 class Logger {
@@ -66,6 +66,7 @@ class Logger {
     }
 
     File logsFile = File(pathToFile);
+
     await logsFile.writeAsString(
       info.toString() + "\n",
       flush: true,

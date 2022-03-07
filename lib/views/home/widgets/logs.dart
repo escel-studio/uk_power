@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 
 import 'package:uk_power/models/ddos_info.dart';
+import 'package:uk_power/models/enums.dart';
 import 'package:uk_power/utils/constants.dart';
 import 'package:uk_power/utils/logger.dart';
 

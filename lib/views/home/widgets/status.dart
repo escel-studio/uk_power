@@ -15,7 +15,11 @@ class HomeStatus extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    EdgeInsets padding = const EdgeInsets.all(10.0);
+    EdgeInsets padding = const EdgeInsets.only(
+      left: 10.0,
+      right: 10.0,
+      bottom: 15.0,
+    );
     Color color = Colors.greenAccent;
 
     if (isError) color = Colors.red;
@@ -28,11 +32,11 @@ class HomeStatus extends StatelessWidget {
             child: Text(
               text,
               textAlign: TextAlign.center,
-              maxLines: 2,
+              maxLines: 3,
               style: TextStyle(
                 color: color,
                 fontWeight: FontWeight.w600,
-                fontSize: 16.sp,
+                fontSize: 14.sp,
               ),
             ),
           ),

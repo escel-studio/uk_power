@@ -71,7 +71,7 @@ class _HomeState extends State<Home> {
         AwesomeDialog(
           context: context,
           dialogType: DialogType.SUCCES,
-          title: "Оновлення не потрібні",
+          title: "Оновлення не потрібні - v$appVersion",
           desc: "Ви вже використовуєте останню версію додатку!",
           btnOkText: "Гаразд",
           btnOkOnPress: () {},
@@ -148,6 +148,7 @@ class _HomeState extends State<Home> {
             ),
           ),
         ),
+        centerTitle: true,
         title: const HomeTitle(),
         actions: [
           Padding(

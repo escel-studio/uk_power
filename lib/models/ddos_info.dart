@@ -2,62 +2,63 @@ import 'dart:convert';
 
 import 'package:intl/intl.dart';
 
-enum DDOSStatus {
-  none,
-  success,
-  attack,
-  error,
-  waiting,
-}
+import 'package:uk_power/models/enums.dart';
+import 'package:uk_power/models/proxy.dart';
 
 class DDOSInfo {
   String msg;
-  Uri? target;
-  DateTime dateTime;
   int responseCode;
   DDOSStatus status;
+  DateTime dateTime;
+  Uri? target;
+  Proxy? proxy;
 
   DDOSInfo({
     required this.msg,
-    this.target,
-    required this.dateTime,
     required this.responseCode,
     required this.status,
+    required this.dateTime,
+    this.target,
+    this.proxy,
   });
 
   DDOSInfo copyWith({
     String? msg,
-    Uri? target,
-    DateTime? dateTime,
     int? responseCode,
     DDOSStatus? status,
+    DateTime? dateTime,
+    Uri? target,
+    Proxy? proxy,
   }) {
     return DDOSInfo(
       msg: msg ?? this.msg,
-      target: target ?? this.target,
-      dateTime: dateTime ?? this.dateTime,
       responseCode: responseCode ?? this.responseCode,
       status: status ?? this.status,
+      dateTime: dateTime ?? this.dateTime,
+      target: target ?? this.target,
+      proxy: proxy ?? this.proxy,
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
       'msg': msg,
-      'target': target?.toString(),
-      'dateTime': dateTime.millisecondsSinceEpoch,
       'responseCode': responseCode,
       'status': status.index,
+      'dateTime': dateTime.millisecondsSinceEpoch,
+      'target': target?.toString(),
+      'proxy': proxy?.toMap(),
     };
   }
 
   factory DDOSInfo.fromMap(Map<String, dynamic> map) {
     return DDOSInfo(
       msg: map['msg'] ?? '',
-      target: map['target'] != null ? Uri.parse(map['target']) : null,
-      dateTime: DateTime.fromMillisecondsSinceEpoch(map['dateTime']),
       responseCode: map['responseCode']?.toInt() ?? 0,
-      status: DDOSStatus.values[map['status'] ?? 0],
+      status: DDOSStatus.values[map['status']?.toInt() ?? 0],
+      dateTime: DateTime.fromMillisecondsSinceEpoch(map['dateTime']),
+      target: map['target'] != null ? Uri.parse(map['target']) : null,
+      proxy: map['proxy'] != null ? Proxy.fromMap(map['proxy']) : null,
     );
   }
 
@@ -80,18 +81,20 @@ class DDOSInfo {
 
     return other is DDOSInfo &&
         other.msg == msg &&
-        other.target == target &&
-        other.dateTime == dateTime &&
         other.responseCode == responseCode &&
-        other.status == status;
+        other.status == status &&
+        other.dateTime == dateTime &&
+        other.target == target &&
+        other.proxy == proxy;
   }
 
   @override
   int get hashCode {
     return msg.hashCode ^
-        target.hashCode ^
-        dateTime.hashCode ^
         responseCode.hashCode ^
-        status.hashCode;
+        status.hashCode ^
+        dateTime.hashCode ^
+        target.hashCode ^
+        proxy.hashCode;
   }
 }
