@@ -27,8 +27,8 @@ class DDOSController {
   /// Init hosts and direct targets
   Future<void> init(void Function(DDOSInfo) callback) async {
     try {
-      callback(await _getHosts());
-      await Future.delayed(const Duration(seconds: 1));
+      // callback(await _getHosts());
+      // await Future.delayed(const Duration(seconds: 1));
       callback(await _getDirectTargets());
       await Future.delayed(const Duration(seconds: 1));
       await proxiesController.fetchAll();
