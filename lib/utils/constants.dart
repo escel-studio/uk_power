@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 /// app version
-const appVersion = '3.1.1';
+const appVersion = '3.1.2';
 
 /// github app version
-const pubspecURL = "https://raw.githubusercontent.com/escel-studio/uk_power/main/pubspec.yaml";
+const pubFileURL = "https://raw.githubusercontent.com/escel-studio/uk_power/main/pubspec.yaml";
 
 /// github releases url template
 const updateURL = "https://github.com/escel-studio/uk_power/releases/download/VERSION/";
@@ -17,7 +17,7 @@ const linuxFile = "Linux.zip";
 const logsFileName = "uk-power-logs.log";
 
 /// default timeout for requests
-const timeout = Duration(seconds: 15);
+const timeout = Duration(seconds: 20);
 
 /// primary color
 const primaryColor = Color(0xFF2697FF);
@@ -40,7 +40,7 @@ const supportURL = "https://raw.githubusercontent.com/Kadzup/ygadiyes/main/smdvp
 const defaultHost = "http://65.108.20.65";
 
 /// ukrainian api's for attacks
-const apiURL = "https://gitlab.com/cto.endel/atack_hosts/-/raw/master/hosts.json";
+const apiURL = "https://hutin-puy.nadom.app/hosts.json";
 
 // global list of proxies
 /// API proxies
