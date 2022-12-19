@@ -29,7 +29,6 @@ class Tutorial {
 
     if (_targets.isNotEmpty) {
       TutorialCoachMark(
-        context,
         targets: _targets,
         colorShadow: Colors.pink,
         textSkip: "Пропустити",
@@ -41,7 +40,7 @@ class Tutorial {
         onSkip: () {
           pref.setBool('tutorialShown', true);
         },
-      ).show();
+      ).show(context: context);
     }
   }
 

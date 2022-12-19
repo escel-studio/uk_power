@@ -18,7 +18,7 @@ class App extends StatelessWidget {
       designSize: const Size(360, 690),
       minTextAdapt: true,
       splitScreenMode: true,
-      builder: () => MaterialApp(
+      builder: (context, w) => MaterialApp(
         title: 'UK Power',
         debugShowCheckedModeBanner: false,
         theme: ThemeData.dark().copyWith(

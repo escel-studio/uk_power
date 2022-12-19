@@ -306,7 +306,7 @@ class _HomeState extends State<Home> {
     int maxThreads = Platform.numberOfProcessors;
 
     for (int i = 0; i < maxThreads; ++i) {
-      ReceivePort receiverPort = ReceivePort("Thread #$i port");
+      final receiverPort = ReceivePort("Thread #$i port");
       ports.add(receiverPort);
 
       isolates.add(

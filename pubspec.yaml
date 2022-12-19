@@ -11,10 +11,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  window_size:
+  menubar:
     git:
-      url: git://github.com/google/flutter-desktop-embedding.git
-      path: plugins/window_size
+      url: https://github.com/google/flutter-desktop-embedding.git
+      path: plugins/menubar
+      ref: 17d4710c17f4913137e7ec931f6e71eaef443363
 
   cupertino_icons: ^1.0.2
   flutter_screenutil: ^5.3.1
